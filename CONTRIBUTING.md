@@ -6,6 +6,7 @@
 - Keep client/game-specific code outside YorGL.
 - Update Kotlin bindings when the C ABI changes.
 - Run `./gradlew build` and native smoke tests before opening a PR.
+- Follow `.editorconfig` and `.clang-format` for touched files.
 
 Branches:
 

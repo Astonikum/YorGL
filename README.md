@@ -22,6 +22,7 @@ Planned backends are added only when they render something real.
 - [Kotlin Binding](docs/kotlin-binding.md)
 - [DX11 Backend](docs/dx11-backend.md)
 - [UI](docs/ui.md)
+- [Security Policy](SECURITY.md)
 
 ## Use From Gradle Git Source Dependency
 
