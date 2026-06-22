@@ -35,8 +35,16 @@ JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_beginFrame(JNIEnv*, jclass, jl
     yorglBeginFrame(handle(ptr));
 }
 
+JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_setViewport(JNIEnv*, jclass, jlong ptr, jfloat x, jfloat y, jfloat width, jfloat height) {
+    yorglSetViewport(handle(ptr), x, y, width, height);
+}
+
 JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_clearColor(JNIEnv*, jclass, jlong ptr, jfloat r, jfloat g, jfloat b, jfloat a) {
     yorglClearColor(handle(ptr), r, g, b, a);
+}
+
+JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_clearDepth(JNIEnv*, jclass, jlong ptr, jfloat depth) {
+    yorglClearDepth(handle(ptr), depth);
 }
 
 JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_endFrame(JNIEnv*, jclass, jlong ptr) {

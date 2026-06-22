@@ -23,7 +23,9 @@ public:
     bool createSwapChain(std::int64_t windowHandle, int width, int height) override;
     void resize(int width, int height) override;
     void beginFrame() override;
+    void setViewport(float x, float y, float width, float height) override;
     void clearColor(float r, float g, float b, float a) override;
+    void clearDepth(float depth) override;
     void endFrame() override;
 
     std::int64_t createTexture(int width, int height, const std::uint8_t* rgba, int byteCount) override;

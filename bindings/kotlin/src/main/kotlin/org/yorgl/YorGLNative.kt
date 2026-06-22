@@ -8,7 +8,9 @@ internal object YorGLNative {
     external fun createSwapChain(ptr: Long, windowHandle: Long, width: Int, height: Int): Boolean
     external fun resize(ptr: Long, width: Int, height: Int)
     external fun beginFrame(ptr: Long)
+    external fun setViewport(ptr: Long, x: Float, y: Float, width: Float, height: Float)
     external fun clearColor(ptr: Long, r: Float, g: Float, b: Float, a: Float)
+    external fun clearDepth(ptr: Long, depth: Float)
     external fun endFrame(ptr: Long)
     external fun createTexture(ptr: Long, width: Int, height: Int, pixels: ByteArray): Long
     external fun destroyTexture(ptr: Long, texture: Long)

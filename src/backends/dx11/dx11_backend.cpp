@@ -87,10 +87,19 @@ void Dx11Backend::beginFrame() {
     if (rtv_) context_->OMSetRenderTargets(1, rtv_.GetAddressOf(), dsv_.Get());
 }
 
+void Dx11Backend::setViewport(float x, float y, float width, float height) {
+    D3D11_VIEWPORT vp{x, y, width, height, 0.0f, 1.0f};
+    context_->RSSetViewports(1, &vp);
+}
+
 void Dx11Backend::clearColor(float r, float g, float b, float a) {
     if (!rtv_) return;
     float color[] = {r, g, b, a};
     context_->ClearRenderTargetView(rtv_.Get(), color);
+}
+
+void Dx11Backend::clearDepth(float depth) {
+    if (dsv_) context_->ClearDepthStencilView(dsv_.Get(), D3D11_CLEAR_DEPTH, depth, 0);
 }
 
 void Dx11Backend::endFrame() {

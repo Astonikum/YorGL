@@ -19,7 +19,9 @@ public:
     virtual bool createSwapChain(std::int64_t windowHandle, int width, int height) = 0;
     virtual void resize(int width, int height) = 0;
     virtual void beginFrame() = 0;
+    virtual void setViewport(float x, float y, float width, float height) = 0;
     virtual void clearColor(float r, float g, float b, float a) = 0;
+    virtual void clearDepth(float depth) = 0;
     virtual void endFrame() = 0;
 
     virtual std::int64_t createTexture(int, int, const std::uint8_t*, int) { return 0; }

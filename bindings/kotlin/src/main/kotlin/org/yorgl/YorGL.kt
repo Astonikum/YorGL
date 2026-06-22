@@ -16,7 +16,9 @@ class YorGL private constructor(private var handle: Long) : AutoCloseable {
 
     fun resize(width: Int, height: Int) = YorGLNative.resize(handle, width, height)
     fun beginFrame() = YorGLNative.beginFrame(handle)
+    fun setViewport(x: Float, y: Float, width: Float, height: Float) = YorGLNative.setViewport(handle, x, y, width, height)
     fun clearColor(r: Float, g: Float, b: Float, a: Float) = YorGLNative.clearColor(handle, r, g, b, a)
+    fun clearDepth(depth: Float) = YorGLNative.clearDepth(handle, depth)
     fun endFrame() = YorGLNative.endFrame(handle)
     fun createTexture(width: Int, height: Int, pixels: ByteArray): Long =
         YorGLNative.createTexture(handle, width, height, pixels)

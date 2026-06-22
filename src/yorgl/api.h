@@ -21,7 +21,9 @@ YORGL_API const char* yorglBackendName(YorGLRenderer* renderer);
 YORGL_API int yorglCreateSwapChain(YorGLRenderer* renderer, int64_t windowHandle, int width, int height);
 YORGL_API void yorglResize(YorGLRenderer* renderer, int width, int height);
 YORGL_API void yorglBeginFrame(YorGLRenderer* renderer);
+YORGL_API void yorglSetViewport(YorGLRenderer* renderer, float x, float y, float width, float height);
 YORGL_API void yorglClearColor(YorGLRenderer* renderer, float r, float g, float b, float a);
+YORGL_API void yorglClearDepth(YorGLRenderer* renderer, float depth);
 YORGL_API void yorglEndFrame(YorGLRenderer* renderer);
 
 YORGL_API int64_t yorglCreateTexture(YorGLRenderer* renderer, int width, int height, const uint8_t* rgba, int byteCount);

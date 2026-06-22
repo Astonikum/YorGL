@@ -54,8 +54,16 @@ void yorglBeginFrame(YorGLRenderer* renderer) {
     if (auto* b = backend(renderer)) b->beginFrame();
 }
 
+void yorglSetViewport(YorGLRenderer* renderer, float x, float y, float width, float height) {
+    if (auto* b = backend(renderer)) b->setViewport(x, y, width, height);
+}
+
 void yorglClearColor(YorGLRenderer* renderer, float r, float g, float b, float a) {
     if (auto* backend = ::backend(renderer)) backend->clearColor(r, g, b, a);
+}
+
+void yorglClearDepth(YorGLRenderer* renderer, float depth) {
+    if (auto* b = backend(renderer)) b->clearDepth(depth);
 }
 
 void yorglEndFrame(YorGLRenderer* renderer) {

@@ -12,7 +12,9 @@ public:
     bool createSwapChain(std::int64_t, int width, int height) override;
     void resize(int width, int height) override;
     void beginFrame() override {}
+    void setViewport(float, float, float, float) override {}
     void clearColor(float r, float g, float b, float a) override;
+    void clearDepth(float) override {}
     void endFrame() override {}
 
 private:
