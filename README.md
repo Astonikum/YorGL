@@ -54,3 +54,12 @@ ctest --test-dir build -C Release --output-on-failure
 ```powershell
 ./gradlew build
 ```
+
+## Releases
+
+CI runs on every push and pull request. Tags that start with `v` create a
+GitHub Release with:
+
+- Kotlin jar built on Windows with the bundled `yorgl.dll`.
+- Native CMake install package for Windows x64 with DX11 enabled.
+- Portable native CMake install package with the null backend on Linux.

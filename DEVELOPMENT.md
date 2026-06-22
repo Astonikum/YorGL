@@ -14,3 +14,19 @@ Rules:
 - Do not put Minecraft/FrostEngine concepts in YorGL.
 - Every public C API or Kotlin API addition gets a matching English doc page update.
 - Kotlin artifact builds must keep bundled native loading working on Windows x64.
+
+## Local Checks
+
+```powershell
+./gradlew build
+cmake -S . -B build-null -DYORGL_BUILD_DX11=OFF -DYORGL_BUILD_TESTS=ON
+cmake --build build-null --config Debug
+ctest --test-dir build-null -C Debug --output-on-failure
+```
+
+## CI/CD
+
+- `.github/workflows/ci.yml` builds native smoke tests on Linux and Windows and
+  builds the Kotlin artifact.
+- `.github/workflows/release.yml` runs on `v*` tags and attaches Kotlin/native
+  packages to the GitHub Release.

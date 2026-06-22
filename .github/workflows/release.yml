@@ -1,0 +1,79 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  kotlin-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Build Kotlin artifact with bundled Windows native library
+        run: ./gradlew.bat clean build
+      - name: Stage Kotlin artifact
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist | Out-Null
+          Copy-Item build/libs/*.jar dist/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: yorgl-kotlin-windows-x64
+          path: dist/*
+
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            name: windows-x64
+            dx11: "ON"
+          - os: ubuntu-latest
+            name: linux-x64-null
+            dx11: "OFF"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: lukka/get-cmake@latest
+      - name: Configure
+        run: cmake -S . -B build -DYORGL_BUILD_DX11=${{ matrix.dx11 }} -DYORGL_BUILD_TESTS=ON
+      - name: Build
+        run: cmake --build build --config Release
+      - name: Test
+        run: ctest --test-dir build --output-on-failure -C Release
+      - name: Install
+        run: cmake --install build --config Release --prefix dist/yorgl-native-${{ matrix.name }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: yorgl-native-${{ matrix.name }}
+          path: dist/yorgl-native-${{ matrix.name }}/**
+
+  github-release:
+    needs:
+      - kotlin-windows
+      - native
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: Pack artifacts
+        run: |
+          mkdir -p release
+          for dir in artifacts/*; do
+            name="$(basename "$dir")"
+            (cd "$dir" && zip -r "../../release/${name}.zip" .)
+          done
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: release/*.zip
