@@ -1,5 +1,7 @@
 package org.yorgl
 
+import java.nio.file.Files
+
 enum class BackendKind(internal val id: Int) {
     Null(0),
     Dx11(1),
@@ -67,12 +69,33 @@ class YorGL private constructor(private var handle: Long) : AutoCloseable {
     }
 
     companion object {
-        fun load(libraryName: String = "yorgl") = System.loadLibrary(libraryName)
+        fun load(libraryName: String = "yorgl") {
+            runCatching { System.loadLibrary(libraryName) }.getOrElse { original ->
+                val resource = nativeResourceName(libraryName)
+                val stream = YorGL::class.java.getResourceAsStream(resource) ?: throw original
+                val suffix = resource.substringAfterLast('.', ".dll")
+                val file = Files.createTempFile("yorgl-", suffix)
+                file.toFile().deleteOnExit()
+                stream.use { input -> Files.copy(input, file, java.nio.file.StandardCopyOption.REPLACE_EXISTING) }
+                System.load(file.toAbsolutePath().toString())
+            }
+        }
 
         fun create(backend: BackendKind = BackendKind.Null): YorGL {
             val ptr = YorGLNative.create(backend.id)
             check(ptr != 0L) { "YorGL failed to create ${backend.name} backend" }
             return YorGL(ptr)
+        }
+
+        private fun nativeResourceName(libraryName: String): String {
+            val os = System.getProperty("os.name").lowercase()
+            val arch = System.getProperty("os.arch").lowercase()
+            val platform = when {
+                os.contains("win") && (arch.contains("64") || arch.contains("amd64")) -> "windows-x64"
+                else -> error("No bundled YorGL native for os=$os arch=$arch")
+            }
+            val file = if (os.contains("win")) "$libraryName.dll" else "lib$libraryName.so"
+            return "/org/yorgl/native/$platform/$file"
         }
     }
 }
