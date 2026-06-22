@@ -5,6 +5,7 @@
 - Prefer deleting duplicate backend code over adding helper layers.
 - Keep client/game-specific code outside YorGL.
 - Update Kotlin bindings when the C ABI changes.
+- Run `./gradlew build` and native smoke tests before opening a PR.
 
 Branches:
 

@@ -1,12 +1,12 @@
 # YorGL
 
-YorGL is a small rendering abstraction library:
+YorGL is a rendering abstraction library:
 
 ```text
 Client bindings -> stable YorGL API -> switchable graphics backend
 ```
 
-Current backends:
+Current backend modules:
 
 - `null` - portable test backend.
 - `dx11` - Windows DirectX 11 backend.
@@ -15,31 +15,41 @@ Kotlin bindings also include `org.yorgl.ui`, a tiny retained UI layer that rende
 
 Planned backends are added only when they render something real.
 
-## Use From Gradle/JitPack
+## Documentation
 
-After `Astonikum/YorGL` exists on GitHub:
+- [Architecture](docs/architecture.md)
+- [C API](docs/c-api.md)
+- [Kotlin Binding](docs/kotlin-binding.md)
+- [DX11 Backend](docs/dx11-backend.md)
+- [UI](docs/ui.md)
+
+## Use From Gradle Git Source Dependency
 
 ```kotlin
-repositories {
-    maven("https://jitpack.io")
+// settings.gradle.kts
+sourceControl {
+    gitRepository(uri("https://github.com/Astonikum/YorGL.git")) {
+        producesModule("org.yorgl:yorgl")
+    }
 }
 
+// build.gradle.kts
 dependencies {
-    implementation("com.github.Astonikum:YorGL:main-SNAPSHOT")
+    implementation("org.yorgl:yorgl:0.1.0-SNAPSHOT")
 }
 ```
 
-Native binaries still have to be on `java.library.path` or next to the app executable.
+The Kotlin artifact bundles `yorgl.dll` for Windows x64 and extracts it on `YorGL.load()`.
 
 ## Build Native
 
 ```powershell
 cmake -S . -B build -DYORGL_BUILD_DX11=ON
 cmake --build build --config Release
-ctest --test-dir build --output-on-failure
+ctest --test-dir build -C Release --output-on-failure
 ```
 
-## Build Kotlin Binding
+## Build Kotlin Artifact
 
 ```powershell
 ./gradlew build

@@ -15,4 +15,19 @@ Renderer instance
 Null / DX11 / future backend
 ```
 
-The API owns renderer lifetime. Backends own graphics-device resources. Client projects own game data, asset conversion, world meshing, UI state, and platform window handles.
+## Layers
+
+- **Client bindings** call the C API from Kotlin and future languages.
+- **C API** keeps a stable ABI in `src/yorgl/api.h`.
+- **C++ renderer facade** owns backend lifetime.
+- **Backend modules** implement the same renderer behavior for each graphics API.
+
+## Ownership
+
+YorGL owns renderer lifetime, native graphics resources, and backend-specific command execution.
+
+Client projects own game data, asset conversion, world meshing, UI state, and platform window handles.
+
+## Backend Rule
+
+A backend enters the public tree only when it can execute real rendering commands. Placeholder backend names may appear in docs or enums only when they do not claim feature support.
