@@ -1,7 +1,7 @@
-#include "sdf_font.h"
+﻿#include "sdf_font.h"
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "stb_truetype.h"
-#include "frost_log.h"
+#include "yorgl_log.hpp"
 #include <cstring>
 #include <algorithm>
 
@@ -20,7 +20,7 @@ bool SdfFontRenderer::init(ID3D11Device* device, ID3D11DeviceContext* ctx,
         return false;
     }
     fontScale_ = stbtt_ScaleForPixelHeight(&fontInfo_, fontSize);
-    bakeAtlas(ttfData, ttfLen, fontSize);
+    bakeAtlas();
     initialized_ = (atlasSRV_ != nullptr);
     return initialized_;
 }
@@ -45,7 +45,7 @@ float SdfFontRenderer::getKerning(int leftCodepoint, int rightCodepoint) const {
     return stbtt_GetCodepointKernAdvance(&fontInfo_, leftCodepoint, rightCodepoint) * fontScale_;
 }
 
-void SdfFontRenderer::bakeAtlas(const unsigned char* ttfData, int ttfLen, float fontSize) {
+void SdfFontRenderer::bakeAtlas() {
     stbtt_fontinfo& font = fontInfo_;
     float scale = fontScale_;
     int iAscent, iDescent, iLineGap;

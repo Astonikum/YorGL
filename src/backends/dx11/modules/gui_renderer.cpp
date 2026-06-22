@@ -1,5 +1,5 @@
-#include "gui_renderer.h"
-#include "frost_log.h"
+﻿#include "gui_renderer.h"
+#include "yorgl_log.hpp"
 #include <d3dcompiler.h>
 #include <cstring>
 
@@ -348,7 +348,7 @@ void GuiRenderer::clearScissor() {
     ctx_->RSSetState(rasterState_.Get());
 }
 
-// ── Blur implementation ──────────────────────────────────────────────────
+// в”Ђв”Ђ Blur implementation в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
 static const char* FULLSCREEN_VS = R"(
 struct PSInput { float4 pos : SV_POSITION; float2 uv : TEXCOORD; };

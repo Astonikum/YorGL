@@ -43,4 +43,157 @@ JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_endFrame(JNIEnv*, jclass, jlon
     yorglEndFrame(handle(ptr));
 }
 
+JNIEXPORT jlong JNICALL Java_org_yorgl_YorGLNative_createTexture(JNIEnv* env, jclass, jlong ptr, jint width, jint height, jbyteArray pixels) {
+    if (!pixels) return 0;
+    jbyte* data = env->GetByteArrayElements(pixels, nullptr);
+    jint len = env->GetArrayLength(pixels);
+    jlong result = yorglCreateTexture(handle(ptr), width, height, reinterpret_cast<const uint8_t*>(data), len);
+    env->ReleaseByteArrayElements(pixels, data, JNI_ABORT);
+    return result;
+}
+
+JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_destroyTexture(JNIEnv*, jclass, jlong ptr, jlong texture) {
+    yorglDestroyTexture(handle(ptr), texture);
+}
+
+JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_guiBegin(JNIEnv*, jclass, jlong ptr, jint width, jint height) {
+    yorglGuiBegin(handle(ptr), width, height);
+}
+
+JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_guiDrawQuad(JNIEnv*, jclass, jlong ptr, jfloat x, jfloat y, jfloat w, jfloat h, jfloat u0, jfloat v0, jfloat u1, jfloat v1, jfloat r, jfloat g, jfloat b, jfloat a) {
+    yorglGuiDrawQuad(handle(ptr), x, y, w, h, u0, v0, u1, v1, r, g, b, a);
+}
+
+JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_guiDrawGradientQuad(JNIEnv* env, jclass, jlong ptr, jfloat x, jfloat y, jfloat w, jfloat h, jfloatArray rgba16) {
+    if (!rgba16 || env->GetArrayLength(rgba16) < 16) return;
+    jfloat* colors = env->GetFloatArrayElements(rgba16, nullptr);
+    yorglGuiDrawGradientQuad(handle(ptr), x, y, w, h, colors);
+    env->ReleaseFloatArrayElements(rgba16, colors, JNI_ABORT);
+}
+
+JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_guiSetTexture(JNIEnv*, jclass, jlong ptr, jlong texture) {
+    yorglGuiSetTexture(handle(ptr), texture);
+}
+
+JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_guiSetScissor(JNIEnv*, jclass, jlong ptr, jfloat x, jfloat y, jfloat w, jfloat h) {
+    yorglGuiSetScissor(handle(ptr), x, y, w, h);
+}
+
+JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_guiClearScissor(JNIEnv*, jclass, jlong ptr) {
+    yorglGuiClearScissor(handle(ptr));
+}
+
+JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_guiSetSdfMode(JNIEnv*, jclass, jlong ptr, jboolean enabled) {
+    yorglGuiSetSdfMode(handle(ptr), enabled);
+}
+
+JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_guiSetSdfParams(JNIEnv*, jclass, jlong ptr, jfloat edge, jfloat softness, jfloat weightBias) {
+    yorglGuiSetSdfParams(handle(ptr), edge, softness, weightBias);
+}
+
+JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_guiBlurRect(JNIEnv*, jclass, jlong ptr, jfloat x, jfloat y, jfloat w, jfloat h, jint passes) {
+    yorglGuiBlurRect(handle(ptr), x, y, w, h, passes);
+}
+
+JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_guiEnd(JNIEnv*, jclass, jlong ptr) {
+    yorglGuiEnd(handle(ptr));
+}
+
+JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_panoramaRender(JNIEnv* env, jclass, jlong ptr, jlongArray faces, jfloat angle, jint width, jint height) {
+    if (!faces || env->GetArrayLength(faces) < 6) return;
+    jlong* values = env->GetLongArrayElements(faces, nullptr);
+    yorglPanoramaRender(handle(ptr), reinterpret_cast<const int64_t*>(values), angle, width, height);
+    env->ReleaseLongArrayElements(faces, values, JNI_ABORT);
+}
+
+JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_worldUploadMesh(JNIEnv* env, jclass, jlong ptr, jfloatArray vertices, jint floatCount) {
+    if (!vertices || floatCount <= 0) {
+        yorglWorldUploadMesh(handle(ptr), nullptr, 0);
+        return;
+    }
+    jfloat* data = env->GetFloatArrayElements(vertices, nullptr);
+    jint len = env->GetArrayLength(vertices);
+    yorglWorldUploadMesh(handle(ptr), data, floatCount < len ? floatCount : len);
+    env->ReleaseFloatArrayElements(vertices, data, JNI_ABORT);
+}
+
+JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_worldUploadSection(JNIEnv* env, jclass, jlong ptr, jlong sectionId, jint x, jint y, jint z, jfloatArray vertices, jint floatCount) {
+    if (!vertices || floatCount <= 0) {
+        yorglWorldUploadSection(handle(ptr), sectionId, x, y, z, nullptr, 0);
+        return;
+    }
+    jfloat* data = env->GetFloatArrayElements(vertices, nullptr);
+    jint len = env->GetArrayLength(vertices);
+    yorglWorldUploadSection(handle(ptr), sectionId, x, y, z, data, floatCount < len ? floatCount : len);
+    env->ReleaseFloatArrayElements(vertices, data, JNI_ABORT);
+}
+
+JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_worldUploadSectionLayer(JNIEnv* env, jclass, jlong ptr, jlong sectionId, jint x, jint y, jint z, jint layer, jfloatArray vertices, jint floatCount) {
+    if (!vertices || floatCount <= 0) {
+        yorglWorldUploadSectionLayer(handle(ptr), sectionId, x, y, z, layer, nullptr, 0);
+        return;
+    }
+    jfloat* data = env->GetFloatArrayElements(vertices, nullptr);
+    jint len = env->GetArrayLength(vertices);
+    yorglWorldUploadSectionLayer(handle(ptr), sectionId, x, y, z, layer, data, floatCount < len ? floatCount : len);
+    env->ReleaseFloatArrayElements(vertices, data, JNI_ABORT);
+}
+
+JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_worldRemoveSection(JNIEnv*, jclass, jlong ptr, jlong sectionId) {
+    yorglWorldRemoveSection(handle(ptr), sectionId);
+}
+
+JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_worldClearSections(JNIEnv*, jclass, jlong ptr) {
+    yorglWorldClearSections(handle(ptr));
+}
+
+JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_worldSetTexture(JNIEnv*, jclass, jlong ptr, jlong texture) {
+    yorglWorldSetTexture(handle(ptr), texture);
+}
+
+JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_worldSetSkyColor(JNIEnv*, jclass, jlong ptr, jfloat r, jfloat g, jfloat b) {
+    yorglWorldSetSkyColor(handle(ptr), r, g, b);
+}
+
+JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_worldRender(JNIEnv*, jclass, jlong ptr, jfloat cameraX, jfloat cameraY, jfloat cameraZ, jfloat dirX, jfloat dirY, jfloat dirZ, jfloat fovYDegrees, jfloat farPlane, jint width, jint height) {
+    yorglWorldRender(handle(ptr), cameraX, cameraY, cameraZ, dirX, dirY, dirZ, fovYDegrees, farPlane, width, height);
+}
+
+JNIEXPORT jlong JNICALL Java_org_yorgl_YorGLNative_sdfFontCreate(JNIEnv* env, jclass, jlong ptr, jbyteArray ttfData, jfloat fontSize) {
+    if (!ttfData) return 0;
+    jbyte* data = env->GetByteArrayElements(ttfData, nullptr);
+    jint len = env->GetArrayLength(ttfData);
+    jlong result = yorglSdfFontCreate(handle(ptr), reinterpret_cast<const uint8_t*>(data), len, fontSize);
+    env->ReleaseByteArrayElements(ttfData, data, JNI_ABORT);
+    return result;
+}
+
+JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_sdfFontDestroy(JNIEnv*, jclass, jlong ptr, jlong font) {
+    yorglSdfFontDestroy(handle(ptr), font);
+}
+
+JNIEXPORT jlong JNICALL Java_org_yorgl_YorGLNative_sdfFontAtlas(JNIEnv*, jclass, jlong ptr, jlong font) {
+    return yorglSdfFontAtlas(handle(ptr), font);
+}
+
+JNIEXPORT jfloatArray JNICALL Java_org_yorgl_YorGLNative_sdfFontMetrics(JNIEnv* env, jclass, jlong ptr, jlong font) {
+    float out[3]{};
+    if (!yorglSdfFontMetrics(handle(ptr), font, out)) return nullptr;
+    jfloatArray result = env->NewFloatArray(3);
+    env->SetFloatArrayRegion(result, 0, 3, out);
+    return result;
+}
+
+JNIEXPORT jfloatArray JNICALL Java_org_yorgl_YorGLNative_sdfFontGlyph(JNIEnv* env, jclass, jlong ptr, jlong font, jint codepoint) {
+    float out[9]{};
+    if (!yorglSdfFontGlyph(handle(ptr), font, codepoint, out)) return nullptr;
+    jfloatArray result = env->NewFloatArray(9);
+    env->SetFloatArrayRegion(result, 0, 9, out);
+    return result;
+}
+
+JNIEXPORT jfloat JNICALL Java_org_yorgl_YorGLNative_sdfFontKerning(JNIEnv*, jclass, jlong ptr, jlong font, jint leftCodepoint, jint rightCodepoint) {
+    return yorglSdfFontKerning(handle(ptr), font, leftCodepoint, rightCodepoint);
+}
+
 }

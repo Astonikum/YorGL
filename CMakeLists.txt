@@ -19,9 +19,15 @@ target_include_directories(yorgl PUBLIC
 target_compile_definitions(yorgl PRIVATE YORGL_BUILDING_DLL)
 
 if (WIN32 AND YORGL_BUILD_DX11)
-    target_sources(yorgl PRIVATE src/backends/dx11/dx11_backend.cpp)
-    target_compile_definitions(yorgl PRIVATE YORGL_HAS_DX11=1)
-    target_link_libraries(yorgl PRIVATE d3d11 dxgi)
+    target_sources(yorgl PRIVATE
+        src/backends/dx11/dx11_backend.cpp
+        src/backends/dx11/modules/cubemap_renderer.cpp
+        src/backends/dx11/modules/gui_renderer.cpp
+        src/backends/dx11/modules/sdf_font.cpp
+        src/backends/dx11/modules/world_renderer.cpp
+    )
+    target_compile_definitions(yorgl PRIVATE YORGL_HAS_DX11=1 NOMINMAX WIN32_LEAN_AND_MEAN)
+    target_link_libraries(yorgl PRIVATE d3d11 dxgi d3dcompiler)
 endif()
 
 if (YORGL_BUILD_JNI)

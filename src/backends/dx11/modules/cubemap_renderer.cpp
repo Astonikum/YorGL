@@ -1,5 +1,5 @@
-#include "cubemap_renderer.h"
-#include "frost_log.h"
+﻿#include "cubemap_renderer.h"
+#include "yorgl_log.hpp"
 #include <d3dcompiler.h>
 #include <cstring>
 #include <cmath>
@@ -134,7 +134,7 @@ void CubemapRenderer::createShaders() {
 }
 
 void CubemapRenderer::createGeometry() {
-    // Inverted unit cube (camera inside looking out). 6 faces × 2 triangles × 3 verts = 36.
+    // Inverted unit cube (camera inside looking out). 6 faces Г— 2 triangles Г— 3 verts = 36.
     // MC panorama face order: front(0), right(1), back(2), left(3), top(4), bottom(5)
     CubeVertex verts[36];
     int idx = 0;

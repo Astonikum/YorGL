@@ -1,5 +1,5 @@
-#include "world_renderer.h"
-#include "frost_log.h"
+﻿#include "world_renderer.h"
+#include "yorgl_log.hpp"
 #include <d3dcompiler.h>
 #include <algorithm>
 #include <cmath>

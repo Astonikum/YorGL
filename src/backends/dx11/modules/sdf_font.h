@@ -32,7 +32,7 @@ public:
     float getDescent() const { return descent_; }
 
 private:
-    void bakeAtlas(const unsigned char* ttfData, int ttfLen, float fontSize);
+    void bakeAtlas();
 
     ID3D11Device* device_ = nullptr;
     ID3D11DeviceContext* ctx_ = nullptr;
