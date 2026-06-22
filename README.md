@@ -11,6 +11,8 @@ Current backends:
 - `null` - portable test backend.
 - `dx11` - Windows DirectX 11 backend.
 
+Kotlin bindings also include `org.yorgl.ui`, a tiny retained UI layer that renders into a client-provided canvas.
+
 Planned backends are added only when they render something real.
 
 ## Use From Gradle/JitPack
