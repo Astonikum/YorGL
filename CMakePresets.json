@@ -1,0 +1,21 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "default",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "CMAKE_CXX_STANDARD": "20",
+        "YORGL_BUILD_TESTS": "ON"
+      }
+    },
+    {
+      "name": "windows-dx11",
+      "inherits": "default",
+      "cacheVariables": {
+        "YORGL_BUILD_DX11": "ON"
+      }
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+build/
+.gradle/
+.idea/
+cmake-build-*/
+out/
+*.dll
+*.dylib
+*.so
+*.lib
+*.exp
+*.pdb
+*.obj
+*.class
+*.jar
