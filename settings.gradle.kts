@@ -12,4 +12,4 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "YorGL"
+rootProject.name = "yorgl"
