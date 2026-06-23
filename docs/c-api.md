@@ -24,9 +24,9 @@ The C API in `src/yorgl/api.h` is the stable boundary used by language bindings.
 - `yorglCreateTexture(renderer, width, height, rgba, byteCount)` uploads immutable RGBA8 pixels and returns an opaque texture handle.
 - `yorglDestroyTexture(renderer, texture)` releases a texture handle created by the same renderer.
 
-## GUI
+## Screen-Space Draw Calls
 
-GUI calls render screen-space quads through the active backend:
+These calls render screen-space quads through the active backend. They are renderer primitives, not a retained UI toolkit:
 
 - `yorglGuiBegin`
 - `yorglGuiDrawQuad`

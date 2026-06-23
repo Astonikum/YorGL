@@ -3,7 +3,7 @@
 YorGL is a rendering abstraction library:
 
 ```text
-Client bindings -> stable YorGL API -> switchable graphics backend
+Client code -> stable YorGL API -> switchable graphics backend
 ```
 
 Current backend modules:
@@ -11,7 +11,7 @@ Current backend modules:
 - `null` - portable test backend.
 - `dx11` - Windows DirectX 11 backend.
 
-Kotlin bindings also include `org.yorgl.ui`, a tiny retained UI layer that renders into a client-provided canvas.
+YorGL does not ship a retained UI toolkit. It exposes low-level drawing calls only; game engines own their menus, widgets, input, layout, animation, and styling.
 
 Planned backends are added only when they render something real.
 
@@ -19,9 +19,8 @@ Planned backends are added only when they render something real.
 
 - [Architecture](docs/architecture.md)
 - [C API](docs/c-api.md)
-- [Kotlin Binding](docs/kotlin-binding.md)
+- [Java Binding](docs/java-binding.md)
 - [DX11 Backend](docs/dx11-backend.md)
-- [UI](docs/ui.md)
 - [Security Policy](SECURITY.md)
 
 ## Use From Gradle Git Source Dependency
@@ -40,7 +39,7 @@ dependencies {
 }
 ```
 
-The Kotlin artifact bundles `yorgl.dll` for Windows x64 and extracts it on `YorGL.load()`.
+The JVM artifact bundles `yorgl.dll` for Windows x64 and extracts it on `YorGL.load()`.
 
 ## Build Native
 
@@ -50,7 +49,7 @@ cmake --build build --config Release
 ctest --test-dir build -C Release --output-on-failure
 ```
 
-## Build Kotlin Artifact
+## Build JVM Artifact
 
 ```powershell
 ./gradlew build
@@ -61,6 +60,6 @@ ctest --test-dir build -C Release --output-on-failure
 CI runs on every push and pull request. Tags that start with `v` create a
 GitHub Release with:
 
-- Kotlin jar built on Windows with the bundled `yorgl.dll`.
+- JVM jar built on Windows with the bundled `yorgl.dll`.
 - Native CMake install package for Windows x64 with DX11 enabled.
 - Portable native CMake install package with the null backend on Linux.

@@ -3,7 +3,7 @@
 `YorGL` exposes a stable C ABI for language bindings and a small C++ backend interface for renderer modules.
 
 ```text
-Kotlin / future bindings
+JVM / future bindings
         |
         v
 YorGL C ABI
@@ -17,7 +17,7 @@ Null / DX11 / future backend
 
 ## Layers
 
-- **Client bindings** call the C API from Kotlin and future languages.
+- **Client bindings** call the C API from Java, Kotlin, and future languages.
 - **C API** keeps a stable ABI in `src/yorgl/api.h`.
 - **C++ renderer facade** owns backend lifetime.
 - **Backend modules** implement the same renderer behavior for each graphics API.
