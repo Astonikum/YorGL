@@ -305,17 +305,13 @@ void WorldRenderer::uploadSectionLayer(long long sectionId, int sectionX, int se
     int vertexCount = floatCount / 9;
     D3D11_BUFFER_DESC bd = {};
     bd.ByteWidth = sizeof(WorldVertex) * vertexCount;
-    bd.Usage = D3D11_USAGE_DYNAMIC;
+    bd.Usage = D3D11_USAGE_DEFAULT;
     bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
+    D3D11_SUBRESOURCE_DATA initialData = {};
+    initialData.pSysMem = data;
     ComPtr<ID3D11Buffer> buffer;
-    if (FAILED(device_->CreateBuffer(&bd, nullptr, &buffer))) return;
-
-    D3D11_MAPPED_SUBRESOURCE mapped;
-    if (FAILED(ctx_->Map(buffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped))) return;
-    memcpy(mapped.pData, data, vertexCount * sizeof(WorldVertex));
-    ctx_->Unmap(buffer.Get(), 0);
+    if (FAILED(device_->CreateBuffer(&bd, &initialData, &buffer))) return;
 
     SectionMesh mesh = sections_[sectionId];
     mesh.centerX = sectionX * 16.0f + 8.0f;
