@@ -183,3 +183,17 @@ float yorglSdfFontKerning(YorGLRenderer* renderer, int64_t font, int leftCodepoi
     auto* b = backend(renderer);
     return b ? b->sdfFontKerning(font, leftCodepoint, rightCodepoint) : 0.0f;
 }
+
+float yorglSdfFontTextWidth(YorGLRenderer* renderer, int64_t font, const char* utf8, int byteCount, float scale) {
+    auto* b = backend(renderer);
+    return b ? b->sdfFontTextWidth(font, utf8, byteCount, scale) : 0.0f;
+}
+
+float yorglSdfFontLineHeight(YorGLRenderer* renderer, int64_t font, float scale) {
+    auto* b = backend(renderer);
+    return b ? b->sdfFontLineHeight(font, scale) : 0.0f;
+}
+
+void yorglSdfFontDrawText(YorGLRenderer* renderer, int64_t font, const char* utf8, int byteCount, float x, float y, float scale, float r, float g, float b, float a, float weight, int shadow) {
+    if (auto* native = backend(renderer)) native->sdfFontDrawText(font, utf8, byteCount, x, y, scale, r, g, b, a, weight, shadow != 0);
+}

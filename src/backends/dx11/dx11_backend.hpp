@@ -59,6 +59,9 @@ public:
     bool sdfFontMetrics(std::int64_t font, float* out3) override;
     bool sdfFontGlyph(std::int64_t font, int codepoint, float* out9) override;
     float sdfFontKerning(std::int64_t font, int leftCodepoint, int rightCodepoint) override;
+    float sdfFontTextWidth(std::int64_t font, const char* utf8, int byteCount, float scale) override;
+    float sdfFontLineHeight(std::int64_t font, float scale) override;
+    void sdfFontDrawText(std::int64_t font, const char* utf8, int byteCount, float x, float y, float scale, float r, float g, float b, float a, float weight, bool shadow) override;
 
 private:
     void createRenderTarget();

@@ -3,8 +3,32 @@
 #if defined(_WIN32)
 
 #include "modules/yorgl_log.hpp"
+#include <algorithm>
+#include <cmath>
 
 namespace yorgl {
+
+static constexpr float SDF_EDGE = 180.0f / 255.0f;
+static constexpr float SDF_SOFTNESS = 0.55f;
+
+static int nextCodepoint(const char*& p, const char* end) {
+    if (p >= end) return 0;
+    unsigned char c = static_cast<unsigned char>(*p++);
+    if (c < 0x80) return c;
+    if ((c >> 5) == 0x6 && p < end) {
+        return ((c & 0x1F) << 6) | (static_cast<unsigned char>(*p++) & 0x3F);
+    }
+    if ((c >> 4) == 0xE && p + 1 < end) {
+        int cp = ((c & 0x0F) << 12) | ((static_cast<unsigned char>(*p++) & 0x3F) << 6);
+        return cp | (static_cast<unsigned char>(*p++) & 0x3F);
+    }
+    if ((c >> 3) == 0x1E && p + 2 < end) {
+        int cp = ((c & 0x07) << 18) | ((static_cast<unsigned char>(*p++) & 0x3F) << 12);
+        cp |= (static_cast<unsigned char>(*p++) & 0x3F) << 6;
+        return cp | (static_cast<unsigned char>(*p++) & 0x3F);
+    }
+    return '?';
+}
 
 Dx11Backend::~Dx11Backend() {
     shutdown();
@@ -219,6 +243,75 @@ bool Dx11Backend::sdfFontGlyph(std::int64_t font, int codepoint, float* out9) {
 float Dx11Backend::sdfFontKerning(std::int64_t font, int leftCodepoint, int rightCodepoint) {
     auto* renderer = reinterpret_cast<SdfFontRenderer*>(font);
     return renderer ? renderer->getKerning(leftCodepoint, rightCodepoint) : 0.0f;
+}
+
+float Dx11Backend::sdfFontTextWidth(std::int64_t font, const char* utf8, int byteCount, float scale) {
+    auto* renderer = reinterpret_cast<SdfFontRenderer*>(font);
+    if (!renderer || !utf8 || byteCount <= 0 || renderer->getFontSize() <= 0.0f) return 0.0f;
+    const float s = scale / renderer->getFontSize();
+    const char* p = utf8;
+    const char* end = utf8 + byteCount;
+    float width = 0.0f;
+    int previous = 0;
+    while (p < end) {
+        int cp = nextCodepoint(p, end);
+        if (previous != 0) width += renderer->getKerning(previous, cp) * s;
+        if (const GlyphInfo* glyph = renderer->getGlyph(cp)) width += glyph->advance * s;
+        else width += renderer->getFontSize() * s * 0.5f;
+        previous = cp;
+    }
+    return width;
+}
+
+float Dx11Backend::sdfFontLineHeight(std::int64_t font, float scale) {
+    auto* renderer = reinterpret_cast<SdfFontRenderer*>(font);
+    return renderer && renderer->getFontSize() > 0.0f ? renderer->getLineHeight() * scale / renderer->getFontSize() : 0.0f;
+}
+
+void Dx11Backend::sdfFontDrawText(std::int64_t font, const char* utf8, int byteCount, float x, float y, float scale, float r, float g, float b, float a, float weight, bool shadow) {
+    auto* renderer = reinterpret_cast<SdfFontRenderer*>(font);
+    if (!renderer || !utf8 || byteCount <= 0 || renderer->getFontSize() <= 0.0f) return;
+    auto draw = [&](float ox, float oy, float cr, float cg, float cb) {
+        const float s = scale / renderer->getFontSize();
+        const char* p = utf8;
+        const char* end = utf8 + byteCount;
+        float cx = std::floor(x + ox);
+        const float baselineY = std::floor(y + oy);
+        int previous = 0;
+        while (p < end) {
+            int cp = nextCodepoint(p, end);
+            if (previous != 0) cx += renderer->getKerning(previous, cp) * s;
+            const GlyphInfo* glyph = renderer->getGlyph(cp);
+            if (!glyph) {
+                cx += renderer->getFontSize() * s * 0.5f;
+                previous = cp;
+                continue;
+            }
+            if (glyph->width > 0.0f && glyph->height > 0.0f) {
+                gui_.drawQuad(
+                    cx + glyph->xoff * s,
+                    baselineY + (renderer->getAscent() + glyph->yoff) * s,
+                    glyph->width * s,
+                    glyph->height * s,
+                    glyph->u0, glyph->v0, glyph->u1, glyph->v1,
+                    cr, cg, cb, a);
+            }
+            cx += glyph->advance * s;
+            previous = cp;
+        }
+    };
+    const float weightBias = std::clamp((weight - 400.0f) / 500.0f * 0.018f, -0.018f, 0.018f);
+    gui_.setSdfMode(true);
+    gui_.setSdfParams(SDF_EDGE, SDF_SOFTNESS, weightBias);
+    gui_.setTexture(renderer->getAtlasSRV());
+    if (shadow) {
+        const float offset = scale * 0.04f;
+        draw(offset, offset, r * 0.25f, g * 0.25f, b * 0.25f);
+    }
+    draw(0.0f, 0.0f, r, g, b);
+    gui_.setTexture(nullptr);
+    gui_.setSdfParams(SDF_EDGE, SDF_SOFTNESS, 0.0f);
+    gui_.setSdfMode(false);
 }
 
 void Dx11Backend::createRenderTarget() {

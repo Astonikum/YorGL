@@ -204,4 +204,25 @@ JNIEXPORT jfloat JNICALL Java_org_yorgl_YorGLNative_sdfFontKerning(JNIEnv*, jcla
     return yorglSdfFontKerning(handle(ptr), font, leftCodepoint, rightCodepoint);
 }
 
+JNIEXPORT jfloat JNICALL Java_org_yorgl_YorGLNative_sdfFontTextWidth(JNIEnv* env, jclass, jlong ptr, jlong font, jstring text, jfloat scale) {
+    if (!text) return 0.0f;
+    const char* utf8 = env->GetStringUTFChars(text, nullptr);
+    jsize len = env->GetStringUTFLength(text);
+    jfloat result = yorglSdfFontTextWidth(handle(ptr), font, utf8, len, scale);
+    env->ReleaseStringUTFChars(text, utf8);
+    return result;
+}
+
+JNIEXPORT jfloat JNICALL Java_org_yorgl_YorGLNative_sdfFontLineHeight(JNIEnv*, jclass, jlong ptr, jlong font, jfloat scale) {
+    return yorglSdfFontLineHeight(handle(ptr), font, scale);
+}
+
+JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_sdfFontDrawText(JNIEnv* env, jclass, jlong ptr, jlong font, jstring text, jfloat x, jfloat y, jfloat scale, jfloat r, jfloat g, jfloat b, jfloat a, jfloat weight, jboolean shadow) {
+    if (!text) return;
+    const char* utf8 = env->GetStringUTFChars(text, nullptr);
+    jsize len = env->GetStringUTFLength(text);
+    yorglSdfFontDrawText(handle(ptr), font, utf8, len, x, y, scale, r, g, b, a, weight, shadow);
+    env->ReleaseStringUTFChars(text, utf8);
+}
+
 }

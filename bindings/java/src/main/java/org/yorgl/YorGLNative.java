@@ -42,4 +42,7 @@ final class YorGLNative {
     static native float[] sdfFontMetrics(long ptr, long font);
     static native float[] sdfFontGlyph(long ptr, long font, int codepoint);
     static native float sdfFontKerning(long ptr, long font, int leftCodepoint, int rightCodepoint);
+    static native float sdfFontTextWidth(long ptr, long font, String text, float scale);
+    static native float sdfFontLineHeight(long ptr, long font, float scale);
+    static native void sdfFontDrawText(long ptr, long font, String text, float x, float y, float scale, float r, float g, float b, float a, float weight, boolean shadow);
 }

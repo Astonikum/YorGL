@@ -57,6 +57,9 @@ YORGL_API int64_t yorglSdfFontAtlas(YorGLRenderer* renderer, int64_t font);
 YORGL_API int yorglSdfFontMetrics(YorGLRenderer* renderer, int64_t font, float* out3);
 YORGL_API int yorglSdfFontGlyph(YorGLRenderer* renderer, int64_t font, int codepoint, float* out9);
 YORGL_API float yorglSdfFontKerning(YorGLRenderer* renderer, int64_t font, int leftCodepoint, int rightCodepoint);
+YORGL_API float yorglSdfFontTextWidth(YorGLRenderer* renderer, int64_t font, const char* utf8, int byteCount, float scale);
+YORGL_API float yorglSdfFontLineHeight(YorGLRenderer* renderer, int64_t font, float scale);
+YORGL_API void yorglSdfFontDrawText(YorGLRenderer* renderer, int64_t font, const char* utf8, int byteCount, float x, float y, float scale, float r, float g, float b, float a, float weight, int shadow);
 
 #ifdef __cplusplus
 }

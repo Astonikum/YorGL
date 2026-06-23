@@ -55,6 +55,9 @@ public:
     virtual bool sdfFontMetrics(std::int64_t, float*) { return false; }
     virtual bool sdfFontGlyph(std::int64_t, int, float*) { return false; }
     virtual float sdfFontKerning(std::int64_t, int, int) { return 0.0f; }
+    virtual float sdfFontTextWidth(std::int64_t, const char*, int, float) { return 0.0f; }
+    virtual float sdfFontLineHeight(std::int64_t, float) { return 0.0f; }
+    virtual void sdfFontDrawText(std::int64_t, const char*, int, float, float, float, float, float, float, float, float, bool) {}
 };
 
 } // namespace yorgl

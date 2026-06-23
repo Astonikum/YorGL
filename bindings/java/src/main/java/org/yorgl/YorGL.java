@@ -183,6 +183,18 @@ public final class YorGL implements AutoCloseable {
         return YorGLNative.sdfFontKerning(handle, font, leftCodepoint, rightCodepoint);
     }
 
+    public float sdfFontTextWidth(long font, String text, float scale) {
+        return YorGLNative.sdfFontTextWidth(handle, font, text, scale);
+    }
+
+    public float sdfFontLineHeight(long font, float scale) {
+        return YorGLNative.sdfFontLineHeight(handle, font, scale);
+    }
+
+    public void sdfFontDrawText(long font, String text, float x, float y, float scale, float r, float g, float b, float a, float weight, boolean shadow) {
+        YorGLNative.sdfFontDrawText(handle, font, text, x, y, scale, r, g, b, a, weight, shadow);
+    }
+
     @Override
     public void close() {
         if (handle != 0L) {

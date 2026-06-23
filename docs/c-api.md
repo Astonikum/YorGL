@@ -62,3 +62,6 @@ The SDF font API creates a backend-owned atlas from TTF bytes:
 - `yorglSdfFontMetrics`
 - `yorglSdfFontGlyph`
 - `yorglSdfFontKerning`
+- `yorglSdfFontTextWidth`
+- `yorglSdfFontLineHeight`
+- `yorglSdfFontDrawText`
