@@ -33,6 +33,12 @@ struct SwapChainOptions {
     bool allowTearing = true;
 };
 
+struct RenderDiagnostics {
+    int lastResizeResult = 0;
+    int lastPresentResult = 0;
+    int deviceRemovedReason = 0;
+};
+
 class Backend {
 public:
     virtual ~Backend() = default;
@@ -52,6 +58,7 @@ public:
     virtual void clearColor(float r, float g, float b, float a) = 0;
     virtual void clearDepth(float depth) = 0;
     virtual BackendCapabilities capabilities() const = 0;
+    virtual RenderDiagnostics diagnostics() const { return {}; }
     virtual void setPresentMode(PresentMode) {}
     virtual void endFrame() = 0;
 

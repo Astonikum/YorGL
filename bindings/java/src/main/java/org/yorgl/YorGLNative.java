@@ -9,6 +9,7 @@ final class YorGLNative {
     static native boolean isValid(long ptr);
     static native String backendName(long ptr);
     static native int[] capabilities(long ptr);
+    static native int[] diagnostics(long ptr);
     static native boolean createSwapChain(long ptr, long windowHandle, int width, int height);
     static native boolean createSwapChainWithOptions(long ptr, long windowHandle, int width, int height, int bufferCount, int presentMode, boolean allowTearing);
     static native void resize(long ptr, int width, int height);

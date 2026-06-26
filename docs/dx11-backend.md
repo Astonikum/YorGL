@@ -6,8 +6,9 @@ The DirectX 11 backend lives in `src/backends/dx11`.
 
 - create the D3D11 device;
 - report D3D feature level, maximum texture size, and present-mode capabilities;
-- create and resize the swap chain, honoring explicit buffer count, initial present mode, and tearing policy;
+- create and resize the swap chain, preserving explicit buffer count, initial present mode, and tearing policy across resize;
 - select `VSync` or `Immediate` present mode, using DXGI tearing only when supported;
+- store the last resize/present HRESULT and device-removed reason for client diagnostics;
 - own render target and depth target resources;
 - host DX11 implementations of GUI, panorama, world mesh, texture, and SDF font modules;
 - present frames through the swap chain.

@@ -24,6 +24,7 @@ try (YorGL renderer = YorGL.create(BackendKind.Dx11)) {
     renderer.clearColor(0f, 0f, 0f, 1f);
     renderer.clearDepth(1f);
     renderer.endFrame();
+    RenderDiagnostics diagnostics = renderer.getDiagnostics();
 }
 ```
 
@@ -42,6 +43,7 @@ The Java class mirrors the C API:
 - swap chain and frame control;
 - explicit swap-chain creation options through `SwapChainOptions`;
 - backend capability query through `RendererCapabilities`;
+- resize, present, and device-removed diagnostics through `RenderDiagnostics`;
 - present mode control through `PresentMode.VSync` and `PresentMode.Immediate`;
 - texture upload and release;
 - screen-space quads, gradients, scissor, blur, and SDF mode;

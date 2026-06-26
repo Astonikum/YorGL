@@ -27,6 +27,7 @@ public:
     void clearColor(float r, float g, float b, float a) override;
     void clearDepth(float depth) override;
     BackendCapabilities capabilities() const override;
+    RenderDiagnostics diagnostics() const override;
     void setPresentMode(PresentMode mode) override;
     void endFrame() override;
 
@@ -81,8 +82,13 @@ private:
     int width_ = 0;
     int height_ = 0;
     D3D_FEATURE_LEVEL featureLevel_ = D3D_FEATURE_LEVEL_11_0;
+    SwapChainOptions swapChainOptions_;
     PresentMode presentMode_ = PresentMode::VSync;
     bool allowTearing_ = false;
+    UINT swapChainFlags_ = 0;
+    HRESULT lastResizeResult_ = S_OK;
+    HRESULT lastPresentResult_ = S_OK;
+    HRESULT deviceRemovedReason_ = S_OK;
 };
 
 } // namespace yorgl

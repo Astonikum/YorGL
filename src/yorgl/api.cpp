@@ -76,6 +76,16 @@ int yorglGetCapabilities(YorGLRenderer* renderer, YorGLCapabilities* outCapabili
     return 1;
 }
 
+int yorglGetDiagnostics(YorGLRenderer* renderer, YorGLRenderDiagnostics* outDiagnostics) {
+    auto* b = backend(renderer);
+    if (!b || !outDiagnostics) return 0;
+    const auto diagnostics = b->diagnostics();
+    outDiagnostics->lastResizeResult = diagnostics.lastResizeResult;
+    outDiagnostics->lastPresentResult = diagnostics.lastPresentResult;
+    outDiagnostics->deviceRemovedReason = diagnostics.deviceRemovedReason;
+    return 1;
+}
+
 int yorglCreateSwapChain(YorGLRenderer* renderer, int64_t windowHandle, int width, int height) {
     auto* b = backend(renderer);
     return b ? b->createSwapChain(windowHandle, width, height) : 0;

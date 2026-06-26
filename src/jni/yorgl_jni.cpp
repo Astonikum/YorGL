@@ -40,6 +40,19 @@ JNIEXPORT jintArray JNICALL Java_org_yorgl_YorGLNative_capabilities(JNIEnv* env,
     return result;
 }
 
+JNIEXPORT jintArray JNICALL Java_org_yorgl_YorGLNative_diagnostics(JNIEnv* env, jclass, jlong ptr) {
+    YorGLRenderDiagnostics diagnostics{};
+    yorglGetDiagnostics(handle(ptr), &diagnostics);
+    jint values[3] = {
+        diagnostics.lastResizeResult,
+        diagnostics.lastPresentResult,
+        diagnostics.deviceRemovedReason,
+    };
+    jintArray result = env->NewIntArray(3);
+    env->SetIntArrayRegion(result, 0, 3, values);
+    return result;
+}
+
 JNIEXPORT jboolean JNICALL Java_org_yorgl_YorGLNative_createSwapChain(JNIEnv*, jclass, jlong ptr, jlong hwnd, jint width, jint height) {
     return yorglCreateSwapChain(handle(ptr), hwnd, width, height) != 0;
 }

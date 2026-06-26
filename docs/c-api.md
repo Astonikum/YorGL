@@ -9,12 +9,13 @@ The C API in `src/yorgl/api.h` is the stable boundary used by language bindings.
 - `yorglIsValid(renderer)` reports whether backend initialization succeeded.
 - `yorglBackendName(renderer)` returns a static backend name.
 - `yorglGetCapabilities(renderer, outCapabilities)` reports the backend kind, graphics feature level, maximum texture size, and supported present modes.
+- `yorglGetDiagnostics(renderer, outDiagnostics)` reports the last resize HRESULT, last present HRESULT, and backend device-removed reason when available.
 
 ## Frame And Swap Chain
 
 - `yorglCreateSwapChain(renderer, windowHandle, width, height)` attaches rendering to a native window.
 - `yorglCreateSwapChainWithOptions(renderer, windowHandle, options)` attaches rendering with explicit width, height, buffer count, initial present mode, and tearing policy.
-- `yorglResize(renderer, width, height)` resizes backend render targets.
+- `yorglResize(renderer, width, height)` resizes backend render targets while keeping the swap-chain buffer count and tearing policy chosen at creation time.
 - `yorglBeginFrame(renderer)` binds frame targets.
 - `yorglSetViewport(renderer, x, y, width, height)` sets the active viewport.
 - `yorglClearColor(renderer, r, g, b, a)` clears the color target.

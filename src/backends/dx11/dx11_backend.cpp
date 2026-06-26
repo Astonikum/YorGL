@@ -69,6 +69,7 @@ void Dx11Backend::shutdown() {
 bool Dx11Backend::createSwapChain(std::int64_t windowHandle, const SwapChainOptions& options) {
     width_ = options.width;
     height_ = options.height;
+    swapChainOptions_ = options;
     presentMode_ = options.presentMode;
 
     Microsoft::WRL::ComPtr<IDXGIDevice> dxgiDevice;
@@ -86,7 +87,8 @@ bool Dx11Backend::createSwapChain(std::int64_t windowHandle, const SwapChainOpti
     desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
     desc.BufferCount = static_cast<UINT>(std::clamp(options.bufferCount, 2, 3));
     desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-    if (options.allowTearing && allowTearing_) desc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
+    swapChainFlags_ = options.allowTearing && allowTearing_ ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
+    desc.Flags = swapChainFlags_;
 
     HRESULT hr = factory->CreateSwapChainForHwnd(
         device_.Get(), reinterpret_cast<HWND>(windowHandle), &desc, nullptr, nullptr, swapChain_.GetAddressOf());
@@ -103,11 +105,17 @@ void Dx11Backend::resize(int width, int height) {
     if (!swapChain_) return;
     width_ = width;
     height_ = height;
+    swapChainOptions_.width = width;
+    swapChainOptions_.height = height;
     rtv_.Reset();
     dsv_.Reset();
     depthBuffer_.Reset();
-    if (SUCCEEDED(swapChain_->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0))) {
+    const UINT bufferCount = static_cast<UINT>(std::clamp(swapChainOptions_.bufferCount, 2, 3));
+    lastResizeResult_ = swapChain_->ResizeBuffers(bufferCount, width, height, DXGI_FORMAT_UNKNOWN, swapChainFlags_);
+    if (SUCCEEDED(lastResizeResult_)) {
         createRenderTarget();
+    } else if (device_) {
+        deviceRemovedReason_ = device_->GetDeviceRemovedReason();
     }
 }
 
@@ -142,16 +150,28 @@ BackendCapabilities Dx11Backend::capabilities() const {
     return caps;
 }
 
+RenderDiagnostics Dx11Backend::diagnostics() const {
+    RenderDiagnostics diagnostics;
+    diagnostics.lastResizeResult = static_cast<int>(lastResizeResult_);
+    diagnostics.lastPresentResult = static_cast<int>(lastPresentResult_);
+    diagnostics.deviceRemovedReason = static_cast<int>(deviceRemovedReason_);
+    return diagnostics;
+}
+
 void Dx11Backend::setPresentMode(PresentMode mode) {
     presentMode_ = mode;
+    swapChainOptions_.presentMode = mode;
 }
 
 void Dx11Backend::endFrame() {
     if (!swapChain_) return;
     const bool immediate = presentMode_ == PresentMode::Immediate;
     const UINT syncInterval = immediate ? 0U : 1U;
-    const UINT flags = immediate && allowTearing_ ? DXGI_PRESENT_ALLOW_TEARING : 0U;
-    swapChain_->Present(syncInterval, flags);
+    const UINT flags = immediate && (swapChainFlags_ & DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING) ? DXGI_PRESENT_ALLOW_TEARING : 0U;
+    lastPresentResult_ = swapChain_->Present(syncInterval, flags);
+    if (FAILED(lastPresentResult_) && device_) {
+        deviceRemovedReason_ = device_->GetDeviceRemovedReason();
+    }
 }
 
 std::int64_t Dx11Backend::createTexture(int width, int height, const std::uint8_t* rgba, int byteCount) {
