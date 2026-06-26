@@ -9,7 +9,7 @@ public:
     std::string_view name() const override { return "null"; }
     bool init() override { return true; }
     void shutdown() override {}
-    bool createSwapChain(std::int64_t, int width, int height) override;
+    bool createSwapChain(std::int64_t, const SwapChainOptions& options) override;
     void resize(int width, int height) override;
     void beginFrame() override {}
     void setViewport(float, float, float, float) override {}

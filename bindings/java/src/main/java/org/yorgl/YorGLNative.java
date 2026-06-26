@@ -10,6 +10,7 @@ final class YorGLNative {
     static native String backendName(long ptr);
     static native int[] capabilities(long ptr);
     static native boolean createSwapChain(long ptr, long windowHandle, int width, int height);
+    static native boolean createSwapChainWithOptions(long ptr, long windowHandle, int width, int height, int bufferCount, int presentMode, boolean allowTearing);
     static native void resize(long ptr, int width, int height);
     static native void beginFrame(long ptr);
     static native void setViewport(long ptr, float x, float y, float width, float height);

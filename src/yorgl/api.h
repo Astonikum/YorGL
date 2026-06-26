@@ -27,6 +27,14 @@ typedef struct YorGLCapabilities {
     int presentTearing;
 } YorGLCapabilities;
 
+typedef struct YorGLSwapChainOptions {
+    int width;
+    int height;
+    int bufferCount;
+    YorGLPresentMode presentMode;
+    int allowTearing;
+} YorGLSwapChainOptions;
+
 typedef struct YorGLRenderer YorGLRenderer;
 
 YORGL_API YorGLRenderer* yorglCreate(YorGLBackendKind backend);
@@ -35,6 +43,7 @@ YORGL_API int yorglIsValid(YorGLRenderer* renderer);
 YORGL_API const char* yorglBackendName(YorGLRenderer* renderer);
 YORGL_API int yorglGetCapabilities(YorGLRenderer* renderer, YorGLCapabilities* outCapabilities);
 YORGL_API int yorglCreateSwapChain(YorGLRenderer* renderer, int64_t windowHandle, int width, int height);
+YORGL_API int yorglCreateSwapChainWithOptions(YorGLRenderer* renderer, int64_t windowHandle, const YorGLSwapChainOptions* options);
 YORGL_API void yorglResize(YorGLRenderer* renderer, int width, int height);
 YORGL_API void yorglBeginFrame(YorGLRenderer* renderer);
 YORGL_API void yorglSetViewport(YorGLRenderer* renderer, float x, float y, float width, float height);

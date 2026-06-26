@@ -55,6 +55,17 @@ public final class YorGL implements AutoCloseable {
         return YorGLNative.createSwapChain(handle, windowHandle, width, height);
     }
 
+    public boolean createSwapChain(long windowHandle, SwapChainOptions options) {
+        return YorGLNative.createSwapChainWithOptions(
+            handle,
+            windowHandle,
+            options.width,
+            options.height,
+            options.bufferCount,
+            options.presentMode.id,
+            options.allowTearing);
+    }
+
     public void resize(int width, int height) {
         YorGLNative.resize(handle, width, height);
     }

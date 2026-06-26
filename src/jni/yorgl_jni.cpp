@@ -44,6 +44,16 @@ JNIEXPORT jboolean JNICALL Java_org_yorgl_YorGLNative_createSwapChain(JNIEnv*, j
     return yorglCreateSwapChain(handle(ptr), hwnd, width, height) != 0;
 }
 
+JNIEXPORT jboolean JNICALL Java_org_yorgl_YorGLNative_createSwapChainWithOptions(JNIEnv*, jclass, jlong ptr, jlong hwnd, jint width, jint height, jint bufferCount, jint presentMode, jboolean allowTearing) {
+    YorGLSwapChainOptions options{};
+    options.width = width;
+    options.height = height;
+    options.bufferCount = bufferCount;
+    options.presentMode = static_cast<YorGLPresentMode>(presentMode);
+    options.allowTearing = allowTearing ? 1 : 0;
+    return yorglCreateSwapChainWithOptions(handle(ptr), hwnd, &options) != 0;
+}
+
 JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_resize(JNIEnv*, jclass, jlong ptr, jint width, jint height) {
     yorglResize(handle(ptr), width, height);
 }

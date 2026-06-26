@@ -25,13 +25,27 @@ struct BackendCapabilities {
     bool presentTearing = false;
 };
 
+struct SwapChainOptions {
+    int width = 0;
+    int height = 0;
+    int bufferCount = 2;
+    PresentMode presentMode = PresentMode::VSync;
+    bool allowTearing = true;
+};
+
 class Backend {
 public:
     virtual ~Backend() = default;
     virtual std::string_view name() const = 0;
     virtual bool init() = 0;
     virtual void shutdown() = 0;
-    virtual bool createSwapChain(std::int64_t windowHandle, int width, int height) = 0;
+    virtual bool createSwapChain(std::int64_t windowHandle, const SwapChainOptions& options) = 0;
+    bool createSwapChain(std::int64_t windowHandle, int width, int height) {
+        SwapChainOptions options;
+        options.width = width;
+        options.height = height;
+        return createSwapChain(windowHandle, options);
+    }
     virtual void resize(int width, int height) = 0;
     virtual void beginFrame() = 0;
     virtual void setViewport(float x, float y, float width, float height) = 0;

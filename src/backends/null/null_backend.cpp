@@ -7,9 +7,10 @@
 
 namespace yorgl {
 
-bool NullBackend::createSwapChain(std::int64_t, int width, int height) {
-    width_ = width;
-    height_ = height;
+bool NullBackend::createSwapChain(std::int64_t, const SwapChainOptions& options) {
+    width_ = options.width;
+    height_ = options.height;
+    presentMode_ = options.presentMode;
     return width_ > 0 && height_ > 0;
 }
 

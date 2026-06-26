@@ -4,6 +4,7 @@
 using yorgl::BackendKind;
 using yorgl::PresentMode;
 using yorgl::Renderer;
+using yorgl::SwapChainOptions;
 
 struct YorGLRenderer {
     Renderer renderer;
@@ -28,6 +29,17 @@ static PresentMode toPresentMode(YorGLPresentMode mode) {
         case YORGL_PRESENT_VSYNC:
         default: return PresentMode::VSync;
     }
+}
+
+static SwapChainOptions toSwapChainOptions(const YorGLSwapChainOptions* source) {
+    SwapChainOptions options;
+    if (!source) return options;
+    options.width = source->width;
+    options.height = source->height;
+    options.bufferCount = source->bufferCount;
+    options.presentMode = toPresentMode(source->presentMode);
+    options.allowTearing = source->allowTearing != 0;
+    return options;
 }
 
 YorGLRenderer* yorglCreate(YorGLBackendKind backend) {
@@ -67,6 +79,12 @@ int yorglGetCapabilities(YorGLRenderer* renderer, YorGLCapabilities* outCapabili
 int yorglCreateSwapChain(YorGLRenderer* renderer, int64_t windowHandle, int width, int height) {
     auto* b = backend(renderer);
     return b ? b->createSwapChain(windowHandle, width, height) : 0;
+}
+
+int yorglCreateSwapChainWithOptions(YorGLRenderer* renderer, int64_t windowHandle, const YorGLSwapChainOptions* options) {
+    auto* b = backend(renderer);
+    if (!b || !options) return 0;
+    return b->createSwapChain(windowHandle, toSwapChainOptions(options));
 }
 
 void yorglResize(YorGLRenderer* renderer, int width, int height) {

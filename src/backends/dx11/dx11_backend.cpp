@@ -66,9 +66,10 @@ void Dx11Backend::shutdown() {
     device_.Reset();
 }
 
-bool Dx11Backend::createSwapChain(std::int64_t windowHandle, int width, int height) {
-    width_ = width;
-    height_ = height;
+bool Dx11Backend::createSwapChain(std::int64_t windowHandle, const SwapChainOptions& options) {
+    width_ = options.width;
+    height_ = options.height;
+    presentMode_ = options.presentMode;
 
     Microsoft::WRL::ComPtr<IDXGIDevice> dxgiDevice;
     Microsoft::WRL::ComPtr<IDXGIAdapter> adapter;
@@ -78,14 +79,14 @@ bool Dx11Backend::createSwapChain(std::int64_t windowHandle, int width, int heig
     if (FAILED(adapter->GetParent(IID_PPV_ARGS(&factory)))) return false;
 
     DXGI_SWAP_CHAIN_DESC1 desc{};
-    desc.Width = width;
-    desc.Height = height;
+    desc.Width = width_;
+    desc.Height = height_;
     desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
     desc.SampleDesc.Count = 1;
     desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-    desc.BufferCount = 2;
+    desc.BufferCount = static_cast<UINT>(std::clamp(options.bufferCount, 2, 3));
     desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-    if (allowTearing_) desc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
+    if (options.allowTearing && allowTearing_) desc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
 
     HRESULT hr = factory->CreateSwapChainForHwnd(
         device_.Get(), reinterpret_cast<HWND>(windowHandle), &desc, nullptr, nullptr, swapChain_.GetAddressOf());

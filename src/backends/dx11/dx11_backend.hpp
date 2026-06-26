@@ -20,7 +20,7 @@ public:
     std::string_view name() const override { return "dx11"; }
     bool init() override;
     void shutdown() override;
-    bool createSwapChain(std::int64_t windowHandle, int width, int height) override;
+    bool createSwapChain(std::int64_t windowHandle, const SwapChainOptions& options) override;
     void resize(int width, int height) override;
     void beginFrame() override;
     void setViewport(float x, float y, float width, float height) override;

@@ -13,6 +13,7 @@ The C API in `src/yorgl/api.h` is the stable boundary used by language bindings.
 ## Frame And Swap Chain
 
 - `yorglCreateSwapChain(renderer, windowHandle, width, height)` attaches rendering to a native window.
+- `yorglCreateSwapChainWithOptions(renderer, windowHandle, options)` attaches rendering with explicit width, height, buffer count, initial present mode, and tearing policy.
 - `yorglResize(renderer, width, height)` resizes backend render targets.
 - `yorglBeginFrame(renderer)` binds frame targets.
 - `yorglSetViewport(renderer, x, y, width, height)` sets the active viewport.
