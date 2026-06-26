@@ -49,6 +49,8 @@ bool Dx11Backend::init() {
         LOG_ERROR("D3D11CreateDevice failed: 0x%08X", hr);
         return false;
     }
+    featureLevel_ = selected;
+    updateTearingSupport();
     return true;
 }
 
@@ -71,17 +73,9 @@ bool Dx11Backend::createSwapChain(std::int64_t windowHandle, int width, int heig
     Microsoft::WRL::ComPtr<IDXGIDevice> dxgiDevice;
     Microsoft::WRL::ComPtr<IDXGIAdapter> adapter;
     Microsoft::WRL::ComPtr<IDXGIFactory2> factory;
-    Microsoft::WRL::ComPtr<IDXGIFactory5> factory5;
     if (FAILED(device_.As(&dxgiDevice))) return false;
     if (FAILED(dxgiDevice->GetAdapter(&adapter))) return false;
     if (FAILED(adapter->GetParent(IID_PPV_ARGS(&factory)))) return false;
-    allowTearing_ = false;
-    if (SUCCEEDED(factory.As(&factory5))) {
-        BOOL supported = FALSE;
-        if (SUCCEEDED(factory5->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &supported, sizeof(supported)))) {
-            allowTearing_ = supported == TRUE;
-        }
-    }
 
     DXGI_SWAP_CHAIN_DESC1 desc{};
     desc.Width = width;
@@ -133,6 +127,18 @@ void Dx11Backend::clearColor(float r, float g, float b, float a) {
 
 void Dx11Backend::clearDepth(float depth) {
     if (dsv_) context_->ClearDepthStencilView(dsv_.Get(), D3D11_CLEAR_DEPTH, depth, 0);
+}
+
+BackendCapabilities Dx11Backend::capabilities() const {
+    BackendCapabilities caps;
+    caps.backend = BackendKind::Dx11;
+    caps.featureLevelMajor = 11;
+    caps.featureLevelMinor = featureLevel_ >= D3D_FEATURE_LEVEL_11_1 ? 1 : 0;
+    caps.maxTextureSize = D3D11_REQ_TEXTURE2D_U_OR_V_DIMENSION;
+    caps.presentVSync = true;
+    caps.presentImmediate = true;
+    caps.presentTearing = allowTearing_;
+    return caps;
 }
 
 void Dx11Backend::setPresentMode(PresentMode mode) {
@@ -347,6 +353,22 @@ void Dx11Backend::createRenderTarget() {
     depthDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
     if (SUCCEEDED(device_->CreateTexture2D(&depthDesc, nullptr, depthBuffer_.GetAddressOf()))) {
         device_->CreateDepthStencilView(depthBuffer_.Get(), nullptr, dsv_.GetAddressOf());
+    }
+}
+
+void Dx11Backend::updateTearingSupport() {
+    allowTearing_ = false;
+    Microsoft::WRL::ComPtr<IDXGIDevice> dxgiDevice;
+    Microsoft::WRL::ComPtr<IDXGIAdapter> adapter;
+    Microsoft::WRL::ComPtr<IDXGIFactory2> factory;
+    Microsoft::WRL::ComPtr<IDXGIFactory5> factory5;
+    if (FAILED(device_.As(&dxgiDevice))) return;
+    if (FAILED(dxgiDevice->GetAdapter(&adapter))) return;
+    if (FAILED(adapter->GetParent(IID_PPV_ARGS(&factory)))) return;
+    if (FAILED(factory.As(&factory5))) return;
+    BOOL supported = FALSE;
+    if (SUCCEEDED(factory5->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &supported, sizeof(supported)))) {
+        allowTearing_ = supported == TRUE;
     }
 }
 

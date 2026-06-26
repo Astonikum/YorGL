@@ -15,6 +15,7 @@ public:
     void setViewport(float, float, float, float) override {}
     void clearColor(float r, float g, float b, float a) override;
     void clearDepth(float) override {}
+    BackendCapabilities capabilities() const override;
     void setPresentMode(PresentMode mode) override { presentMode_ = mode; }
     void endFrame() override {}
 

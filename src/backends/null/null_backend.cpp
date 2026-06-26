@@ -25,6 +25,14 @@ void NullBackend::clearColor(float r, float g, float b, float a) {
     clear_[3] = a;
 }
 
+BackendCapabilities NullBackend::capabilities() const {
+    BackendCapabilities caps;
+    caps.backend = BackendKind::Null;
+    caps.presentVSync = true;
+    caps.presentImmediate = true;
+    return caps;
+}
+
 std::unique_ptr<Backend> createBackend(BackendKind kind) {
     switch (kind) {
 #ifdef YORGL_HAS_DX11

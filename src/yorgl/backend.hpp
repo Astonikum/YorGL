@@ -15,6 +15,16 @@ enum class PresentMode {
     Immediate = 1,
 };
 
+struct BackendCapabilities {
+    BackendKind backend = BackendKind::Null;
+    int featureLevelMajor = 0;
+    int featureLevelMinor = 0;
+    int maxTextureSize = 0;
+    bool presentVSync = false;
+    bool presentImmediate = false;
+    bool presentTearing = false;
+};
+
 class Backend {
 public:
     virtual ~Backend() = default;
@@ -27,6 +37,7 @@ public:
     virtual void setViewport(float x, float y, float width, float height) = 0;
     virtual void clearColor(float r, float g, float b, float a) = 0;
     virtual void clearDepth(float depth) = 0;
+    virtual BackendCapabilities capabilities() const = 0;
     virtual void setPresentMode(PresentMode) {}
     virtual void endFrame() = 0;
 

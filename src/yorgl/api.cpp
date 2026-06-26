@@ -50,6 +50,20 @@ const char* yorglBackendName(YorGLRenderer* renderer) {
     return name.data();
 }
 
+int yorglGetCapabilities(YorGLRenderer* renderer, YorGLCapabilities* outCapabilities) {
+    auto* b = backend(renderer);
+    if (!b || !outCapabilities) return 0;
+    const auto caps = b->capabilities();
+    outCapabilities->backend = static_cast<int>(caps.backend);
+    outCapabilities->featureLevelMajor = caps.featureLevelMajor;
+    outCapabilities->featureLevelMinor = caps.featureLevelMinor;
+    outCapabilities->maxTextureSize = caps.maxTextureSize;
+    outCapabilities->presentVSync = caps.presentVSync ? 1 : 0;
+    outCapabilities->presentImmediate = caps.presentImmediate ? 1 : 0;
+    outCapabilities->presentTearing = caps.presentTearing ? 1 : 0;
+    return 1;
+}
+
 int yorglCreateSwapChain(YorGLRenderer* renderer, int64_t windowHandle, int width, int height) {
     auto* b = backend(renderer);
     return b ? b->createSwapChain(windowHandle, width, height) : 0;

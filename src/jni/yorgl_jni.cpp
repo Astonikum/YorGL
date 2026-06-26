@@ -23,6 +23,23 @@ JNIEXPORT jstring JNICALL Java_org_yorgl_YorGLNative_backendName(JNIEnv* env, jc
     return env->NewStringUTF(yorglBackendName(handle(ptr)));
 }
 
+JNIEXPORT jintArray JNICALL Java_org_yorgl_YorGLNative_capabilities(JNIEnv* env, jclass, jlong ptr) {
+    YorGLCapabilities caps{};
+    yorglGetCapabilities(handle(ptr), &caps);
+    jint values[7] = {
+        caps.backend,
+        caps.featureLevelMajor,
+        caps.featureLevelMinor,
+        caps.maxTextureSize,
+        caps.presentVSync,
+        caps.presentImmediate,
+        caps.presentTearing,
+    };
+    jintArray result = env->NewIntArray(7);
+    env->SetIntArrayRegion(result, 0, 7, values);
+    return result;
+}
+
 JNIEXPORT jboolean JNICALL Java_org_yorgl_YorGLNative_createSwapChain(JNIEnv*, jclass, jlong ptr, jlong hwnd, jint width, jint height) {
     return yorglCreateSwapChain(handle(ptr), hwnd, width, height) != 0;
 }

@@ -47,6 +47,10 @@ public final class YorGL implements AutoCloseable {
         return YorGLNative.backendName(handle);
     }
 
+    public RendererCapabilities getCapabilities() {
+        return new RendererCapabilities(YorGLNative.capabilities(handle));
+    }
+
     public boolean createSwapChain(long windowHandle, int width, int height) {
         return YorGLNative.createSwapChain(handle, windowHandle, width, height);
     }

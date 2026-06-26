@@ -5,6 +5,7 @@ The DirectX 11 backend lives in `src/backends/dx11`.
 ## Responsibilities
 
 - create the D3D11 device;
+- report D3D feature level, maximum texture size, and present-mode capabilities;
 - create and resize the swap chain;
 - select `VSync` or `Immediate` present mode, using DXGI tearing only when supported;
 - own render target and depth target resources;

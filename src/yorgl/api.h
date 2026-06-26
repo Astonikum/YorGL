@@ -17,12 +17,23 @@ typedef enum YorGLPresentMode {
     YORGL_PRESENT_IMMEDIATE = 1
 } YorGLPresentMode;
 
+typedef struct YorGLCapabilities {
+    int backend;
+    int featureLevelMajor;
+    int featureLevelMinor;
+    int maxTextureSize;
+    int presentVSync;
+    int presentImmediate;
+    int presentTearing;
+} YorGLCapabilities;
+
 typedef struct YorGLRenderer YorGLRenderer;
 
 YORGL_API YorGLRenderer* yorglCreate(YorGLBackendKind backend);
 YORGL_API void yorglDestroy(YorGLRenderer* renderer);
 YORGL_API int yorglIsValid(YorGLRenderer* renderer);
 YORGL_API const char* yorglBackendName(YorGLRenderer* renderer);
+YORGL_API int yorglGetCapabilities(YorGLRenderer* renderer, YorGLCapabilities* outCapabilities);
 YORGL_API int yorglCreateSwapChain(YorGLRenderer* renderer, int64_t windowHandle, int width, int height);
 YORGL_API void yorglResize(YorGLRenderer* renderer, int width, int height);
 YORGL_API void yorglBeginFrame(YorGLRenderer* renderer);

@@ -8,6 +8,7 @@ The C API in `src/yorgl/api.h` is the stable boundary used by language bindings.
 - `yorglDestroy(renderer)` releases the renderer and all backend-owned graphics resources.
 - `yorglIsValid(renderer)` reports whether backend initialization succeeded.
 - `yorglBackendName(renderer)` returns a static backend name.
+- `yorglGetCapabilities(renderer, outCapabilities)` reports the backend kind, graphics feature level, maximum texture size, and supported present modes.
 
 ## Frame And Swap Chain
 

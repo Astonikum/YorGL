@@ -8,6 +8,7 @@ final class YorGLNative {
     static native void destroy(long ptr);
     static native boolean isValid(long ptr);
     static native String backendName(long ptr);
+    static native int[] capabilities(long ptr);
     static native boolean createSwapChain(long ptr, long windowHandle, int width, int height);
     static native void resize(long ptr, int width, int height);
     static native void beginFrame(long ptr);

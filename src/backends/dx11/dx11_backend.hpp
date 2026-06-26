@@ -26,6 +26,7 @@ public:
     void setViewport(float x, float y, float width, float height) override;
     void clearColor(float r, float g, float b, float a) override;
     void clearDepth(float depth) override;
+    BackendCapabilities capabilities() const override;
     void setPresentMode(PresentMode mode) override;
     void endFrame() override;
 
@@ -65,6 +66,7 @@ public:
     void sdfFontDrawText(std::int64_t font, const char* utf8, int byteCount, float x, float y, float scale, float r, float g, float b, float a, float weight, bool shadow) override;
 
 private:
+    void updateTearingSupport();
     void createRenderTarget();
 
     Microsoft::WRL::ComPtr<ID3D11Device> device_;
@@ -78,6 +80,7 @@ private:
     WorldRenderer world_;
     int width_ = 0;
     int height_ = 0;
+    D3D_FEATURE_LEVEL featureLevel_ = D3D_FEATURE_LEVEL_11_0;
     PresentMode presentMode_ = PresentMode::VSync;
     bool allowTearing_ = false;
 };
