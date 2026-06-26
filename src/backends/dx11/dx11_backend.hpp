@@ -4,7 +4,7 @@
 
 #if defined(_WIN32)
 #include <d3d11.h>
-#include <dxgi1_2.h>
+#include <dxgi1_5.h>
 #include <wrl/client.h>
 #include "modules/cubemap_renderer.h"
 #include "modules/gui_renderer.h"
@@ -26,6 +26,7 @@ public:
     void setViewport(float x, float y, float width, float height) override;
     void clearColor(float r, float g, float b, float a) override;
     void clearDepth(float depth) override;
+    void setPresentMode(PresentMode mode) override;
     void endFrame() override;
 
     std::int64_t createTexture(int width, int height, const std::uint8_t* rgba, int byteCount) override;
@@ -77,6 +78,8 @@ private:
     WorldRenderer world_;
     int width_ = 0;
     int height_ = 0;
+    PresentMode presentMode_ = PresentMode::VSync;
+    bool allowTearing_ = false;
 };
 
 } // namespace yorgl

@@ -17,6 +17,8 @@ The C API in `src/yorgl/api.h` is the stable boundary used by language bindings.
 - `yorglSetViewport(renderer, x, y, width, height)` sets the active viewport.
 - `yorglClearColor(renderer, r, g, b, a)` clears the color target.
 - `yorglClearDepth(renderer, depth)` clears the depth target.
+- `yorglSetPresentMode(renderer, YORGL_PRESENT_VSYNC)` presents with vertical sync.
+- `yorglSetPresentMode(renderer, YORGL_PRESENT_IMMEDIATE)` presents without waiting for vblank; the DX11 backend enables DXGI tearing when the OS and driver report support.
 - `yorglEndFrame(renderer)` presents the frame when the backend owns a swap chain.
 
 ## Textures

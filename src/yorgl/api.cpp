@@ -2,6 +2,7 @@
 #include "renderer.hpp"
 
 using yorgl::BackendKind;
+using yorgl::PresentMode;
 using yorgl::Renderer;
 
 struct YorGLRenderer {
@@ -19,6 +20,14 @@ static BackendKind toBackend(YorGLBackendKind backend) {
 static yorgl::Backend* backend(YorGLRenderer* renderer) {
     if (!renderer || !renderer->renderer.valid()) return nullptr;
     return &renderer->renderer.backend();
+}
+
+static PresentMode toPresentMode(YorGLPresentMode mode) {
+    switch (mode) {
+        case YORGL_PRESENT_IMMEDIATE: return PresentMode::Immediate;
+        case YORGL_PRESENT_VSYNC:
+        default: return PresentMode::VSync;
+    }
 }
 
 YorGLRenderer* yorglCreate(YorGLBackendKind backend) {
@@ -64,6 +73,10 @@ void yorglClearColor(YorGLRenderer* renderer, float r, float g, float b, float a
 
 void yorglClearDepth(YorGLRenderer* renderer, float depth) {
     if (auto* b = backend(renderer)) b->clearDepth(depth);
+}
+
+void yorglSetPresentMode(YorGLRenderer* renderer, YorGLPresentMode mode) {
+    if (auto* b = backend(renderer)) b->setPresentMode(toPresentMode(mode));
 }
 
 void yorglEndFrame(YorGLRenderer* renderer) {

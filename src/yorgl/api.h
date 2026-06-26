@@ -12,6 +12,11 @@ typedef enum YorGLBackendKind {
     YORGL_BACKEND_DX11 = 1
 } YorGLBackendKind;
 
+typedef enum YorGLPresentMode {
+    YORGL_PRESENT_VSYNC = 0,
+    YORGL_PRESENT_IMMEDIATE = 1
+} YorGLPresentMode;
+
 typedef struct YorGLRenderer YorGLRenderer;
 
 YORGL_API YorGLRenderer* yorglCreate(YorGLBackendKind backend);
@@ -24,6 +29,7 @@ YORGL_API void yorglBeginFrame(YorGLRenderer* renderer);
 YORGL_API void yorglSetViewport(YorGLRenderer* renderer, float x, float y, float width, float height);
 YORGL_API void yorglClearColor(YorGLRenderer* renderer, float r, float g, float b, float a);
 YORGL_API void yorglClearDepth(YorGLRenderer* renderer, float depth);
+YORGL_API void yorglSetPresentMode(YorGLRenderer* renderer, YorGLPresentMode mode);
 YORGL_API void yorglEndFrame(YorGLRenderer* renderer);
 
 YORGL_API int64_t yorglCreateTexture(YorGLRenderer* renderer, int width, int height, const uint8_t* rgba, int byteCount);

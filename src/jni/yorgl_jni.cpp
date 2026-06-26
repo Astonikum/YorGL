@@ -47,6 +47,10 @@ JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_clearDepth(JNIEnv*, jclass, jl
     yorglClearDepth(handle(ptr), depth);
 }
 
+JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_setPresentMode(JNIEnv*, jclass, jlong ptr, jint mode) {
+    yorglSetPresentMode(handle(ptr), static_cast<YorGLPresentMode>(mode));
+}
+
 JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_endFrame(JNIEnv*, jclass, jlong ptr) {
     yorglEndFrame(handle(ptr));
 }

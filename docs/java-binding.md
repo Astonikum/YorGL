@@ -17,6 +17,7 @@ YorGL.load();
 ```java
 try (YorGL renderer = YorGL.create(BackendKind.Dx11)) {
     renderer.createSwapChain(hwnd, width, height);
+    renderer.setPresentMode(PresentMode.VSync);
     renderer.beginFrame();
     renderer.setViewport(0f, 0f, (float) width, (float) height);
     renderer.clearColor(0f, 0f, 0f, 1f);
@@ -38,6 +39,7 @@ YorGL.create(BackendKind.Dx11).use { renderer ->
 The Java class mirrors the C API:
 
 - swap chain and frame control;
+- present mode control through `PresentMode.VSync` and `PresentMode.Immediate`;
 - texture upload and release;
 - screen-space quads, gradients, scissor, blur, and SDF mode;
 - panorama rendering;

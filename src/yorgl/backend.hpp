@@ -10,6 +10,11 @@ enum class BackendKind {
     Dx11 = 1,
 };
 
+enum class PresentMode {
+    VSync = 0,
+    Immediate = 1,
+};
+
 class Backend {
 public:
     virtual ~Backend() = default;
@@ -22,6 +27,7 @@ public:
     virtual void setViewport(float x, float y, float width, float height) = 0;
     virtual void clearColor(float r, float g, float b, float a) = 0;
     virtual void clearDepth(float depth) = 0;
+    virtual void setPresentMode(PresentMode) {}
     virtual void endFrame() = 0;
 
     virtual std::int64_t createTexture(int, int, const std::uint8_t*, int) { return 0; }

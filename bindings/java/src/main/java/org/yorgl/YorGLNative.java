@@ -14,6 +14,7 @@ final class YorGLNative {
     static native void setViewport(long ptr, float x, float y, float width, float height);
     static native void clearColor(long ptr, float r, float g, float b, float a);
     static native void clearDepth(long ptr, float depth);
+    static native void setPresentMode(long ptr, int mode);
     static native void endFrame(long ptr);
     static native long createTexture(long ptr, int width, int height, byte[] pixels);
     static native void destroyTexture(long ptr, long texture);

@@ -71,6 +71,10 @@ public final class YorGL implements AutoCloseable {
         YorGLNative.clearDepth(handle, depth);
     }
 
+    public void setPresentMode(PresentMode mode) {
+        YorGLNative.setPresentMode(handle, mode.id);
+    }
+
     public void endFrame() {
         YorGLNative.endFrame(handle);
     }

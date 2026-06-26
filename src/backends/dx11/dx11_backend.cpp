@@ -71,9 +71,17 @@ bool Dx11Backend::createSwapChain(std::int64_t windowHandle, int width, int heig
     Microsoft::WRL::ComPtr<IDXGIDevice> dxgiDevice;
     Microsoft::WRL::ComPtr<IDXGIAdapter> adapter;
     Microsoft::WRL::ComPtr<IDXGIFactory2> factory;
+    Microsoft::WRL::ComPtr<IDXGIFactory5> factory5;
     if (FAILED(device_.As(&dxgiDevice))) return false;
     if (FAILED(dxgiDevice->GetAdapter(&adapter))) return false;
     if (FAILED(adapter->GetParent(IID_PPV_ARGS(&factory)))) return false;
+    allowTearing_ = false;
+    if (SUCCEEDED(factory.As(&factory5))) {
+        BOOL supported = FALSE;
+        if (SUCCEEDED(factory5->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &supported, sizeof(supported)))) {
+            allowTearing_ = supported == TRUE;
+        }
+    }
 
     DXGI_SWAP_CHAIN_DESC1 desc{};
     desc.Width = width;
@@ -83,6 +91,7 @@ bool Dx11Backend::createSwapChain(std::int64_t windowHandle, int width, int heig
     desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
     desc.BufferCount = 2;
     desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+    if (allowTearing_) desc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
 
     HRESULT hr = factory->CreateSwapChainForHwnd(
         device_.Get(), reinterpret_cast<HWND>(windowHandle), &desc, nullptr, nullptr, swapChain_.GetAddressOf());
@@ -126,8 +135,16 @@ void Dx11Backend::clearDepth(float depth) {
     if (dsv_) context_->ClearDepthStencilView(dsv_.Get(), D3D11_CLEAR_DEPTH, depth, 0);
 }
 
+void Dx11Backend::setPresentMode(PresentMode mode) {
+    presentMode_ = mode;
+}
+
 void Dx11Backend::endFrame() {
-    if (swapChain_) swapChain_->Present(1, 0);
+    if (!swapChain_) return;
+    const bool immediate = presentMode_ == PresentMode::Immediate;
+    const UINT syncInterval = immediate ? 0U : 1U;
+    const UINT flags = immediate && allowTearing_ ? DXGI_PRESENT_ALLOW_TEARING : 0U;
+    swapChain_->Present(syncInterval, flags);
 }
 
 std::int64_t Dx11Backend::createTexture(int width, int height, const std::uint8_t* rgba, int byteCount) {
