@@ -17,6 +17,11 @@ typedef enum YorGLPresentMode {
     YORGL_PRESENT_IMMEDIATE = 1
 } YorGLPresentMode;
 
+typedef enum YorGLTextureFilter {
+    YORGL_TEXTURE_FILTER_NEAREST = 0,
+    YORGL_TEXTURE_FILTER_LINEAR = 1
+} YorGLTextureFilter;
+
 typedef struct YorGLCapabilities {
     int backend;
     int featureLevelMajor;
@@ -81,6 +86,7 @@ YORGL_API void yorglWorldUploadSectionLayer(YorGLRenderer* renderer, int64_t sec
 YORGL_API void yorglWorldRemoveSection(YorGLRenderer* renderer, int64_t sectionId);
 YORGL_API void yorglWorldClearSections(YorGLRenderer* renderer);
 YORGL_API void yorglWorldSetTexture(YorGLRenderer* renderer, int64_t texture);
+YORGL_API void yorglWorldSetTextureFilter(YorGLRenderer* renderer, YorGLTextureFilter filter);
 YORGL_API void yorglWorldSetSkyColor(YorGLRenderer* renderer, float r, float g, float b);
 YORGL_API void yorglWorldRender(YorGLRenderer* renderer, float cameraX, float cameraY, float cameraZ, float dirX, float dirY, float dirZ, float fovYDegrees, float farPlane, int width, int height);
 

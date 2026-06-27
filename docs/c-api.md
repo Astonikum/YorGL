@@ -54,6 +54,7 @@ World rendering is generic mesh rendering. YorGL does not know about Minecraft c
 - `yorglWorldRemoveSection`
 - `yorglWorldClearSections`
 - `yorglWorldSetTexture`
+- `yorglWorldSetTextureFilter`
 - `yorglWorldSetSkyColor`
 - `yorglWorldRender`
 

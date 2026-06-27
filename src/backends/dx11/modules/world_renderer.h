@@ -3,6 +3,7 @@
 #include <d3d11.h>
 #include <wrl/client.h>
 #include <unordered_map>
+#include "../../../yorgl/backend.hpp"
 
 using Microsoft::WRL::ComPtr;
 
@@ -16,6 +17,7 @@ public:
     void removeSection(long long sectionId);
     void clearSections();
     void setTexture(ID3D11ShaderResourceView* texture);
+    void setTextureFilter(yorgl::TextureFilter filter);
     void setSkyColor(float r, float g, float b);
     void render(float cameraX, float cameraY, float cameraZ,
                 float dirX, float dirY, float dirZ, float fovYDegrees, float farPlane, int screenW, int screenH,
@@ -52,12 +54,14 @@ private:
     ComPtr<ID3D11DepthStencilState> depthOff_;
     ComPtr<ID3D11BlendState> blendOff_;
     ComPtr<ID3D11BlendState> blendOn_;
-    ComPtr<ID3D11SamplerState> sampler_;
+    ComPtr<ID3D11SamplerState> samplerPoint_;
+    ComPtr<ID3D11SamplerState> samplerLinear_;
 
     int vertexCapacity_ = 0;
     int vertexCount_ = 0;
     std::unordered_map<long long, SectionMesh> sections_;
     float skyColor_[4] = {0.10f, 0.13f, 0.16f, 1.0f};
     ID3D11ShaderResourceView* texture_ = nullptr;
+    yorgl::TextureFilter textureFilter_ = yorgl::TextureFilter::Nearest;
     bool initialized_ = false;
 };

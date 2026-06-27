@@ -38,6 +38,7 @@ final class YorGLNative {
     static native void worldRemoveSection(long ptr, long sectionId);
     static native void worldClearSections(long ptr);
     static native void worldSetTexture(long ptr, long texture);
+    static native void worldSetTextureFilter(long ptr, int filter);
     static native void worldSetSkyColor(long ptr, float r, float g, float b);
     static native void worldRender(long ptr, float cameraX, float cameraY, float cameraZ, float dirX, float dirY, float dirZ, float fovYDegrees, float farPlane, int width, int height);
     static native long sdfFontCreate(long ptr, byte[] ttfData, float fontSize);

@@ -53,6 +53,7 @@ public:
     void worldRemoveSection(std::int64_t sectionId) override;
     void worldClearSections() override;
     void worldSetTexture(std::int64_t texture) override;
+    void worldSetTextureFilter(TextureFilter filter) override;
     void worldSetSkyColor(float r, float g, float b) override;
     void worldRender(float cameraX, float cameraY, float cameraZ, float dirX, float dirY, float dirZ, float fovYDegrees, float farPlane, int width, int height) override;
 

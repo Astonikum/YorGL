@@ -156,7 +156,7 @@ void WorldRenderer::shutdown() {
     vs_.Reset(); ps_.Reset(); inputLayout_.Reset();
     vertexBuffer_.Reset(); constantBuffer_.Reset(); rasterState_.Reset();
     depthOn_.Reset(); depthRead_.Reset();
-    depthOff_.Reset(); blendOff_.Reset(); blendOn_.Reset(); sampler_.Reset();
+    depthOff_.Reset(); blendOff_.Reset(); blendOn_.Reset(); samplerPoint_.Reset(); samplerLinear_.Reset();
     vertexCapacity_ = 0;
     vertexCount_ = 0;
     sections_.clear();
@@ -260,7 +260,9 @@ void WorldRenderer::createStates() {
     sd.ComparisonFunc = D3D11_COMPARISON_NEVER;
     sd.MinLOD = 0;
     sd.MaxLOD = D3D11_FLOAT32_MAX;
-    device_->CreateSamplerState(&sd, &sampler_);
+    device_->CreateSamplerState(&sd, &samplerPoint_);
+    sd.Filter = D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
+    device_->CreateSamplerState(&sd, &samplerLinear_);
 }
 
 void WorldRenderer::uploadMesh(const float* data, int floatCount) {
@@ -341,6 +343,10 @@ void WorldRenderer::setTexture(ID3D11ShaderResourceView* texture) {
     texture_ = texture;
 }
 
+void WorldRenderer::setTextureFilter(yorgl::TextureFilter filter) {
+    textureFilter_ = filter;
+}
+
 void WorldRenderer::setSkyColor(float r, float g, float b) {
     skyColor_[0] = r;
     skyColor_[1] = g;
@@ -396,7 +402,8 @@ void WorldRenderer::render(float cameraX, float cameraY, float cameraZ,
     ctx_->VSSetConstantBuffers(0, 1, constantBuffer_.GetAddressOf());
     ctx_->PSSetShader(ps_.Get(), nullptr, 0);
     ctx_->PSSetConstantBuffers(0, 1, constantBuffer_.GetAddressOf());
-    ctx_->PSSetSamplers(0, 1, sampler_.GetAddressOf());
+    auto& sampler = textureFilter_ == yorgl::TextureFilter::Linear ? samplerLinear_ : samplerPoint_;
+    ctx_->PSSetSamplers(0, 1, sampler.GetAddressOf());
     ctx_->PSSetShaderResources(0, 1, &texture_);
     if (!sections_.empty()) {
         std::vector<SectionMesh*> opaqueList;

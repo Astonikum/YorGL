@@ -5,6 +5,7 @@ using yorgl::BackendKind;
 using yorgl::PresentMode;
 using yorgl::Renderer;
 using yorgl::SwapChainOptions;
+using yorgl::TextureFilter;
 
 struct YorGLRenderer {
     Renderer renderer;
@@ -28,6 +29,14 @@ static PresentMode toPresentMode(YorGLPresentMode mode) {
         case YORGL_PRESENT_IMMEDIATE: return PresentMode::Immediate;
         case YORGL_PRESENT_VSYNC:
         default: return PresentMode::VSync;
+    }
+}
+
+static TextureFilter toTextureFilter(YorGLTextureFilter filter) {
+    switch (filter) {
+        case YORGL_TEXTURE_FILTER_LINEAR: return TextureFilter::Linear;
+        case YORGL_TEXTURE_FILTER_NEAREST:
+        default: return TextureFilter::Nearest;
     }
 }
 
@@ -200,6 +209,10 @@ void yorglWorldClearSections(YorGLRenderer* renderer) {
 
 void yorglWorldSetTexture(YorGLRenderer* renderer, int64_t texture) {
     if (auto* b = backend(renderer)) b->worldSetTexture(texture);
+}
+
+void yorglWorldSetTextureFilter(YorGLRenderer* renderer, YorGLTextureFilter filter) {
+    if (auto* b = backend(renderer)) b->worldSetTextureFilter(toTextureFilter(filter));
 }
 
 void yorglWorldSetSkyColor(YorGLRenderer* renderer, float r, float g, float b) {

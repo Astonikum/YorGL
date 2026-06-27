@@ -174,6 +174,10 @@ public final class YorGL implements AutoCloseable {
         YorGLNative.worldSetTexture(handle, texture);
     }
 
+    public void worldSetTextureFilter(TextureFilter filter) {
+        YorGLNative.worldSetTextureFilter(handle, filter.id);
+    }
+
     public void worldSetSkyColor(float r, float g, float b) {
         YorGLNative.worldSetSkyColor(handle, r, g, b);
     }

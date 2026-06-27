@@ -203,6 +203,10 @@ JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_worldSetTexture(JNIEnv*, jclas
     yorglWorldSetTexture(handle(ptr), texture);
 }
 
+JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_worldSetTextureFilter(JNIEnv*, jclass, jlong ptr, jint filter) {
+    yorglWorldSetTextureFilter(handle(ptr), static_cast<YorGLTextureFilter>(filter));
+}
+
 JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_worldSetSkyColor(JNIEnv*, jclass, jlong ptr, jfloat r, jfloat g, jfloat b) {
     yorglWorldSetSkyColor(handle(ptr), r, g, b);
 }

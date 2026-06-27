@@ -15,6 +15,11 @@ enum class PresentMode {
     Immediate = 1,
 };
 
+enum class TextureFilter {
+    Nearest = 0,
+    Linear = 1,
+};
+
 struct BackendCapabilities {
     BackendKind backend = BackendKind::Null;
     int featureLevelMajor = 0;
@@ -84,6 +89,7 @@ public:
     virtual void worldRemoveSection(std::int64_t) {}
     virtual void worldClearSections() {}
     virtual void worldSetTexture(std::int64_t) {}
+    virtual void worldSetTextureFilter(TextureFilter) {}
     virtual void worldSetSkyColor(float, float, float) {}
     virtual void worldRender(float, float, float, float, float, float, float, float, int, int) {}
 

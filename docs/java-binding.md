@@ -48,7 +48,7 @@ The Java class mirrors the C API:
 - texture upload and release;
 - screen-space quads, gradients, scissor, blur, and SDF mode;
 - panorama rendering;
-- world mesh upload, section layer upload, texture binding, sky color, render;
+- world mesh upload, section layer upload, texture binding, texture filter, sky color, render;
 - SDF font atlas, metrics, glyphs, kerning, text measurement, and text drawing.
 
 The binding does not introduce game-specific concepts. Game engines translate their own world, UI, and asset data before calling YorGL.
