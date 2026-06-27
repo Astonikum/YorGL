@@ -44,6 +44,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
       - uses: lukka/get-cmake@latest
       - name: Configure
         run: cmake -S . -B build -DYORGL_BUILD_DX11=${{ matrix.dx11 }} -DYORGL_BUILD_TESTS=ON

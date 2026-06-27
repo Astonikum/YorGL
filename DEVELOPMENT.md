@@ -26,7 +26,8 @@ ctest --test-dir build-null -C Debug --output-on-failure
 
 ## CI/CD
 
-- `.github/workflows/ci.yml` builds native smoke tests on Linux and Windows and
-  builds the Kotlin artifact.
+- `.github/workflows/ci.yml` builds native smoke tests on Linux and Windows,
+  builds the JVM artifact on Linux, and builds the Windows JVM artifact with
+  bundled `yorgl.dll`.
 - `.github/workflows/release.yml` runs on `v*` tags and attaches Kotlin/native
   packages to the GitHub Release.
