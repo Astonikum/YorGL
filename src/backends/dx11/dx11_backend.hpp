@@ -32,6 +32,7 @@ public:
     void endFrame() override;
 
     std::int64_t createTexture(int width, int height, const std::uint8_t* rgba, int byteCount) override;
+    bool updateTextureRegion(std::int64_t texture, int x, int y, int width, int height, const std::uint8_t* rgba, int byteCount) override;
     void destroyTexture(std::int64_t texture) override;
 
     void guiBegin(int width, int height) override;

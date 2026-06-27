@@ -10,7 +10,7 @@ The DirectX 11 backend lives in `src/backends/dx11`.
 - select `VSync` or `Immediate` present mode, using DXGI tearing only when supported;
 - store the last resize/present HRESULT and device-removed reason for client diagnostics;
 - own render target and depth target resources;
-- host DX11 implementations of GUI, panorama, world mesh, texture, and SDF font modules;
+- host DX11 implementations of GUI, panorama, world mesh, texture upload/update, and SDF font modules;
 - present frames through the swap chain.
 
 ## Modules

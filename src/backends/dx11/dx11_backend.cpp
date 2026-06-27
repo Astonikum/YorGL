@@ -183,7 +183,7 @@ std::int64_t Dx11Backend::createTexture(int width, int height, const std::uint8_
     td.ArraySize = 1;
     td.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
     td.SampleDesc.Count = 1;
-    td.Usage = D3D11_USAGE_IMMUTABLE;
+    td.Usage = D3D11_USAGE_DEFAULT;
     td.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 
     D3D11_SUBRESOURCE_DATA sd{};
@@ -196,6 +196,27 @@ std::int64_t Dx11Backend::createTexture(int width, int height, const std::uint8_
     HRESULT hr = device_->CreateShaderResourceView(texture, nullptr, &srv);
     texture->Release();
     return SUCCEEDED(hr) ? reinterpret_cast<std::int64_t>(srv) : 0;
+}
+
+bool Dx11Backend::updateTextureRegion(std::int64_t texture, int x, int y, int width, int height, const std::uint8_t* rgba, int byteCount) {
+    if (!context_ || !rgba || texture == 0 || x < 0 || y < 0 || width <= 0 || height <= 0 || byteCount < width * height * 4) return false;
+    auto* srv = reinterpret_cast<ID3D11ShaderResourceView*>(texture);
+    Microsoft::WRL::ComPtr<ID3D11Resource> resource;
+    srv->GetResource(resource.GetAddressOf());
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> tex;
+    if (FAILED(resource.As(&tex))) return false;
+    D3D11_TEXTURE2D_DESC desc{};
+    tex->GetDesc(&desc);
+    if (x + width > static_cast<int>(desc.Width) || y + height > static_cast<int>(desc.Height)) return false;
+    D3D11_BOX box{};
+    box.left = static_cast<UINT>(x);
+    box.top = static_cast<UINT>(y);
+    box.front = 0;
+    box.right = static_cast<UINT>(x + width);
+    box.bottom = static_cast<UINT>(y + height);
+    box.back = 1;
+    context_->UpdateSubresource(tex.Get(), 0, &box, rgba, static_cast<UINT>(width * 4), 0);
+    return true;
 }
 
 void Dx11Backend::destroyTexture(std::int64_t texture) {

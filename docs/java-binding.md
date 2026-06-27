@@ -45,7 +45,7 @@ The Java class mirrors the C API:
 - backend capability query through `RendererCapabilities`;
 - resize, present, and device-removed diagnostics through `RenderDiagnostics`;
 - present mode control through `PresentMode.VSync` and `PresentMode.Immediate`;
-- texture upload and release;
+- texture upload, region update, and release;
 - screen-space quads, gradients, scissor, blur, and SDF mode;
 - panorama rendering;
 - world mesh upload, section layer upload, texture binding, texture filter, sky color, render;

@@ -139,6 +139,11 @@ int64_t yorglCreateTexture(YorGLRenderer* renderer, int width, int height, const
     return b ? b->createTexture(width, height, rgba, byteCount) : 0;
 }
 
+int yorglUpdateTextureRegion(YorGLRenderer* renderer, int64_t texture, int x, int y, int width, int height, const uint8_t* rgba, int byteCount) {
+    auto* b = backend(renderer);
+    return b && b->updateTextureRegion(texture, x, y, width, height, rgba, byteCount);
+}
+
 void yorglDestroyTexture(YorGLRenderer* renderer, int64_t texture) {
     if (auto* b = backend(renderer)) b->destroyTexture(texture);
 }

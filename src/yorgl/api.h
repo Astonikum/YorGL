@@ -65,6 +65,7 @@ YORGL_API void yorglSetPresentMode(YorGLRenderer* renderer, YorGLPresentMode mod
 YORGL_API void yorglEndFrame(YorGLRenderer* renderer);
 
 YORGL_API int64_t yorglCreateTexture(YorGLRenderer* renderer, int width, int height, const uint8_t* rgba, int byteCount);
+YORGL_API int yorglUpdateTextureRegion(YorGLRenderer* renderer, int64_t texture, int x, int y, int width, int height, const uint8_t* rgba, int byteCount);
 YORGL_API void yorglDestroyTexture(YorGLRenderer* renderer, int64_t texture);
 
 YORGL_API void yorglGuiBegin(YorGLRenderer* renderer, int width, int height);

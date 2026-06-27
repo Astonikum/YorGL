@@ -102,6 +102,10 @@ public final class YorGL implements AutoCloseable {
         return YorGLNative.createTexture(handle, width, height, pixels);
     }
 
+    public boolean updateTextureRegion(long texture, int x, int y, int width, int height, byte[] pixels) {
+        return YorGLNative.updateTextureRegion(handle, texture, x, y, width, height, pixels);
+    }
+
     public void destroyTexture(long texture) {
         YorGLNative.destroyTexture(handle, texture);
     }

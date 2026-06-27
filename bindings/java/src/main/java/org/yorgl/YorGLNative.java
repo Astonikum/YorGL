@@ -20,6 +20,7 @@ final class YorGLNative {
     static native void setPresentMode(long ptr, int mode);
     static native void endFrame(long ptr);
     static native long createTexture(long ptr, int width, int height, byte[] pixels);
+    static native boolean updateTextureRegion(long ptr, long texture, int x, int y, int width, int height, byte[] pixels);
     static native void destroyTexture(long ptr, long texture);
     static native void guiBegin(long ptr, int width, int height);
     static native void guiDrawQuad(long ptr, float x, float y, float w, float h, float u0, float v0, float u1, float v1, float r, float g, float b, float a);

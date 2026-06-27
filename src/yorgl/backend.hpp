@@ -68,6 +68,7 @@ public:
     virtual void endFrame() = 0;
 
     virtual std::int64_t createTexture(int, int, const std::uint8_t*, int) { return 0; }
+    virtual bool updateTextureRegion(std::int64_t, int, int, int, int, const std::uint8_t*, int) { return false; }
     virtual void destroyTexture(std::int64_t) {}
 
     virtual void guiBegin(int, int) {}

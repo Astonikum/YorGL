@@ -104,6 +104,15 @@ JNIEXPORT jlong JNICALL Java_org_yorgl_YorGLNative_createTexture(JNIEnv* env, jc
     return result;
 }
 
+JNIEXPORT jboolean JNICALL Java_org_yorgl_YorGLNative_updateTextureRegion(JNIEnv* env, jclass, jlong ptr, jlong texture, jint x, jint y, jint width, jint height, jbyteArray pixels) {
+    if (!pixels) return false;
+    jbyte* data = env->GetByteArrayElements(pixels, nullptr);
+    jint len = env->GetArrayLength(pixels);
+    const bool result = yorglUpdateTextureRegion(handle(ptr), texture, x, y, width, height, reinterpret_cast<const uint8_t*>(data), len) != 0;
+    env->ReleaseByteArrayElements(pixels, data, JNI_ABORT);
+    return result;
+}
+
 JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_destroyTexture(JNIEnv*, jclass, jlong ptr, jlong texture) {
     yorglDestroyTexture(handle(ptr), texture);
 }
