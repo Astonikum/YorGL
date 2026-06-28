@@ -48,7 +48,7 @@ The Java class mirrors the C API:
 - texture upload, region update, and release;
 - screen-space quads, gradients, scissor, blur, and SDF mode;
 - cubemap rendering through `cubemapRender`; `panoramaRender` remains as a compatibility alias;
-- world mesh upload, section layer upload, texture binding, texture filter, sky color, render;
+- world mesh upload, section layer upload, optional per-layer texture override, texture binding, texture filter, sky color, render;
 - SDF font atlas, metrics, glyphs, kerning, text measurement, and text drawing.
 
 The binding does not introduce game-specific concepts. Game engines translate their own world, UI, and asset data before calling YorGL.

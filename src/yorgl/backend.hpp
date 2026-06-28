@@ -90,6 +90,7 @@ public:
     virtual void worldUploadMesh(const float*, int) {}
     virtual void worldUploadSection(std::int64_t, int, int, int, const float*, int) {}
     virtual void worldUploadSectionLayer(std::int64_t, int, int, int, int, const float*, int) {}
+    virtual void worldUploadSectionLayerTextured(std::int64_t, int, int, int, int, std::int64_t, const float*, int) {}
     virtual void worldRemoveSection(std::int64_t) {}
     virtual void worldClearSections() {}
     virtual void worldSetTexture(std::int64_t) {}

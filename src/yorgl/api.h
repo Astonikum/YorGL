@@ -85,6 +85,7 @@ YORGL_API void yorglPanoramaRender(YorGLRenderer* renderer, const int64_t* faces
 YORGL_API void yorglWorldUploadMesh(YorGLRenderer* renderer, const float* vertices, int floatCount);
 YORGL_API void yorglWorldUploadSection(YorGLRenderer* renderer, int64_t sectionId, int x, int y, int z, const float* vertices, int floatCount);
 YORGL_API void yorglWorldUploadSectionLayer(YorGLRenderer* renderer, int64_t sectionId, int x, int y, int z, int layer, const float* vertices, int floatCount);
+YORGL_API void yorglWorldUploadSectionLayerTextured(YorGLRenderer* renderer, int64_t sectionId, int x, int y, int z, int layer, int64_t texture, const float* vertices, int floatCount);
 YORGL_API void yorglWorldRemoveSection(YorGLRenderer* renderer, int64_t sectionId);
 YORGL_API void yorglWorldClearSections(YorGLRenderer* renderer);
 YORGL_API void yorglWorldSetTexture(YorGLRenderer* renderer, int64_t texture);

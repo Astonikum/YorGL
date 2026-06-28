@@ -208,6 +208,10 @@ void yorglWorldUploadSectionLayer(YorGLRenderer* renderer, int64_t sectionId, in
     if (auto* b = backend(renderer)) b->worldUploadSectionLayer(sectionId, x, y, z, layer, vertices, floatCount);
 }
 
+void yorglWorldUploadSectionLayerTextured(YorGLRenderer* renderer, int64_t sectionId, int x, int y, int z, int layer, int64_t texture, const float* vertices, int floatCount) {
+    if (auto* b = backend(renderer)) b->worldUploadSectionLayerTextured(sectionId, x, y, z, layer, texture, vertices, floatCount);
+}
+
 void yorglWorldRemoveSection(YorGLRenderer* renderer, int64_t sectionId) {
     if (auto* b = backend(renderer)) b->worldRemoveSection(sectionId);
 }

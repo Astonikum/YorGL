@@ -37,6 +37,7 @@ final class YorGLNative {
     static native void worldUploadMesh(long ptr, float[] vertices, int floatCount);
     static native void worldUploadSection(long ptr, long sectionId, int x, int y, int z, float[] vertices, int floatCount);
     static native void worldUploadSectionLayer(long ptr, long sectionId, int x, int y, int z, int layer, float[] vertices, int floatCount);
+    static native void worldUploadSectionLayerTextured(long ptr, long sectionId, int x, int y, int z, int layer, long texture, float[] vertices, int floatCount);
     static native void worldRemoveSection(long ptr, long sectionId);
     static native void worldClearSections(long ptr);
     static native void worldSetTexture(long ptr, long texture);

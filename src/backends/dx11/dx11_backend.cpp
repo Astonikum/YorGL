@@ -261,6 +261,9 @@ void Dx11Backend::worldUploadSection(std::int64_t sectionId, int x, int y, int z
 void Dx11Backend::worldUploadSectionLayer(std::int64_t sectionId, int x, int y, int z, int layer, const float* vertices, int floatCount) {
     world_.uploadSectionLayer(sectionId, x, y, z, layer, vertices, floatCount);
 }
+void Dx11Backend::worldUploadSectionLayerTextured(std::int64_t sectionId, int x, int y, int z, int layer, std::int64_t texture, const float* vertices, int floatCount) {
+    world_.uploadSectionLayerTextured(sectionId, x, y, z, layer, reinterpret_cast<ID3D11ShaderResourceView*>(texture), vertices, floatCount);
+}
 void Dx11Backend::worldRemoveSection(std::int64_t sectionId) { world_.removeSection(sectionId); }
 void Dx11Backend::worldClearSections() { world_.clearSections(); }
 void Dx11Backend::worldSetTexture(std::int64_t texture) { world_.setTexture(reinterpret_cast<ID3D11ShaderResourceView*>(texture)); }

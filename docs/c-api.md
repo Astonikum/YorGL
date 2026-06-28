@@ -59,12 +59,17 @@ World rendering is generic mesh rendering. YorGL does not know about Minecraft c
 - `yorglWorldUploadMesh`
 - `yorglWorldUploadSection`
 - `yorglWorldUploadSectionLayer`
+- `yorglWorldUploadSectionLayerTextured`
 - `yorglWorldRemoveSection`
 - `yorglWorldClearSections`
 - `yorglWorldSetTexture`
 - `yorglWorldSetTextureFilter`
 - `yorglWorldSetSkyColor`
 - `yorglWorldRender`
+
+`yorglWorldUploadSectionLayerTextured` uploads one section layer with a
+per-layer texture override. Use it for dynamic world layers such as text or
+markers that need a different atlas from the global world texture.
 
 ## Fonts
 

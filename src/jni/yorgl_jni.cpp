@@ -204,6 +204,17 @@ JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_worldUploadSectionLayer(JNIEnv
     env->ReleaseFloatArrayElements(vertices, data, JNI_ABORT);
 }
 
+JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_worldUploadSectionLayerTextured(JNIEnv* env, jclass, jlong ptr, jlong sectionId, jint x, jint y, jint z, jint layer, jlong texture, jfloatArray vertices, jint floatCount) {
+    if (!vertices || floatCount <= 0) {
+        yorglWorldUploadSectionLayerTextured(handle(ptr), sectionId, x, y, z, layer, texture, nullptr, 0);
+        return;
+    }
+    jfloat* data = env->GetFloatArrayElements(vertices, nullptr);
+    jint len = env->GetArrayLength(vertices);
+    yorglWorldUploadSectionLayerTextured(handle(ptr), sectionId, x, y, z, layer, texture, data, floatCount < len ? floatCount : len);
+    env->ReleaseFloatArrayElements(vertices, data, JNI_ABORT);
+}
+
 JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_worldRemoveSection(JNIEnv*, jclass, jlong ptr, jlong sectionId) {
     yorglWorldRemoveSection(handle(ptr), sectionId);
 }

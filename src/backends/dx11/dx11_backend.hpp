@@ -51,6 +51,7 @@ public:
     void worldUploadMesh(const float* vertices, int floatCount) override;
     void worldUploadSection(std::int64_t sectionId, int x, int y, int z, const float* vertices, int floatCount) override;
     void worldUploadSectionLayer(std::int64_t sectionId, int x, int y, int z, int layer, const float* vertices, int floatCount) override;
+    void worldUploadSectionLayerTextured(std::int64_t sectionId, int x, int y, int z, int layer, std::int64_t texture, const float* vertices, int floatCount) override;
     void worldRemoveSection(std::int64_t sectionId) override;
     void worldClearSections() override;
     void worldSetTexture(std::int64_t texture) override;

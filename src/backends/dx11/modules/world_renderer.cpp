@@ -71,14 +71,6 @@ struct WorldVertex {
     float u, v;
 };
 
-struct CameraConstants {
-    float mvp[16];
-    float useTexture;
-    float cameraPos[3];
-    float skyColor[4];
-    float fogParams[4];
-};
-
 struct Vec3 {
     float x, y, z;
 };
@@ -290,15 +282,23 @@ void WorldRenderer::uploadSection(long long sectionId, int sectionX, int section
 }
 
 void WorldRenderer::uploadSectionLayer(long long sectionId, int sectionX, int sectionY, int sectionZ, int layer, const float* data, int floatCount) {
+    uploadSectionLayerTextured(sectionId, sectionX, sectionY, sectionZ, layer, nullptr, data, floatCount);
+}
+
+void WorldRenderer::uploadSectionLayerTextured(long long sectionId, int sectionX, int sectionY, int sectionZ, int layer, ID3D11ShaderResourceView* texture, const float* data, int floatCount) {
     if (!initialized_ || !data || floatCount <= 0) {
         auto found = sections_.find(sectionId);
         if (found != sections_.end()) {
             if (layer == 1) {
                 found->second.translucentBuffer.Reset();
                 found->second.translucentVertexCount = 0;
+                found->second.translucentTexture = nullptr;
+                found->second.translucentTextureOverride = false;
             } else {
                 found->second.opaqueBuffer.Reset();
                 found->second.opaqueVertexCount = 0;
+                found->second.opaqueTexture = nullptr;
+                found->second.opaqueTextureOverride = false;
             }
             if (found->second.opaqueVertexCount <= 0 && found->second.translucentVertexCount <= 0) sections_.erase(found);
         }
@@ -322,9 +322,13 @@ void WorldRenderer::uploadSectionLayer(long long sectionId, int sectionX, int se
     if (layer == 1) {
         mesh.translucentBuffer = buffer;
         mesh.translucentVertexCount = vertexCount;
+        mesh.translucentTexture = texture;
+        mesh.translucentTextureOverride = texture != nullptr;
     } else {
         mesh.opaqueBuffer = buffer;
         mesh.opaqueVertexCount = vertexCount;
+        mesh.opaqueTexture = texture;
+        mesh.opaqueTextureOverride = texture != nullptr;
     }
     sections_[sectionId] = mesh;
     vertexCount_ = 0;
@@ -405,6 +409,7 @@ void WorldRenderer::render(float cameraX, float cameraY, float cameraZ,
     auto& sampler = textureFilter_ == yorgl::TextureFilter::Linear ? samplerLinear_ : samplerPoint_;
     ctx_->PSSetSamplers(0, 1, sampler.GetAddressOf());
     ctx_->PSSetShaderResources(0, 1, &texture_);
+    bool textureEnabled = constants.useTexture > 0.5f;
     if (!sections_.empty()) {
         std::vector<SectionMesh*> opaqueList;
         std::vector<SectionMesh*> translucentList;
@@ -441,25 +446,37 @@ void WorldRenderer::render(float cameraX, float cameraY, float cameraZ,
         ctx_->OMSetBlendState(blendOff_.Get(), nullptr, 0xFFFFFFFF);
         ctx_->OMSetDepthStencilState(depthOn_.Get(), 0);
         for (auto* mesh : opaqueList) {
-            drawBuffer(mesh->opaqueBuffer.Get(), mesh->opaqueVertexCount);
+            drawBuffer(mesh->opaqueBuffer.Get(), mesh->opaqueVertexCount, mesh->opaqueTexture, mesh->opaqueTextureOverride, constants, textureEnabled);
         }
 
         ctx_->OMSetBlendState(blendOn_.Get(), nullptr, 0xFFFFFFFF);
         ctx_->OMSetDepthStencilState(depthRead_.Get(), 0);
         for (auto* mesh : translucentList) {
-            drawBuffer(mesh->translucentBuffer.Get(), mesh->translucentVertexCount);
+            drawBuffer(mesh->translucentBuffer.Get(), mesh->translucentVertexCount, mesh->translucentTexture, mesh->translucentTextureOverride, constants, textureEnabled);
         }
     } else {
         ctx_->OMSetBlendState(blendOff_.Get(), nullptr, 0xFFFFFFFF);
         ctx_->OMSetDepthStencilState(depthOn_.Get(), 0);
-        drawBuffer(vertexBuffer_.Get(), vertexCount_);
+        drawBuffer(vertexBuffer_.Get(), vertexCount_, nullptr, false, constants, textureEnabled);
     }
     ID3D11ShaderResourceView* nullSrv = nullptr;
     ctx_->PSSetShaderResources(0, 1, &nullSrv);
 }
 
-void WorldRenderer::drawBuffer(ID3D11Buffer* buffer, int vertexCount) {
+void WorldRenderer::drawBuffer(ID3D11Buffer* buffer, int vertexCount, ID3D11ShaderResourceView* texture, bool textureOverride, CameraConstants& constants, bool& textureEnabled) {
     if (!buffer || vertexCount <= 0) return;
+    ID3D11ShaderResourceView* activeTexture = textureOverride ? texture : texture_;
+    const bool nextTextureEnabled = activeTexture != nullptr;
+    if (nextTextureEnabled != textureEnabled) {
+        constants.useTexture = nextTextureEnabled ? 1.0f : 0.0f;
+        D3D11_MAPPED_SUBRESOURCE mapped;
+        if (SUCCEEDED(ctx_->Map(constantBuffer_.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped))) {
+            memcpy(mapped.pData, &constants, sizeof(constants));
+            ctx_->Unmap(constantBuffer_.Get(), 0);
+        }
+        textureEnabled = nextTextureEnabled;
+    }
+    ctx_->PSSetShaderResources(0, 1, &activeTexture);
     UINT stride = sizeof(WorldVertex), offset = 0;
     ctx_->IASetVertexBuffers(0, 1, &buffer, &stride, &offset);
     ctx_->Draw((UINT)vertexCount, 0);

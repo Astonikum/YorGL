@@ -14,6 +14,7 @@ public:
     void uploadMesh(const float* data, int floatCount);
     void uploadSection(long long sectionId, int sectionX, int sectionY, int sectionZ, const float* data, int floatCount);
     void uploadSectionLayer(long long sectionId, int sectionX, int sectionY, int sectionZ, int layer, const float* data, int floatCount);
+    void uploadSectionLayerTextured(long long sectionId, int sectionX, int sectionY, int sectionZ, int layer, ID3D11ShaderResourceView* texture, const float* data, int floatCount);
     void removeSection(long long sectionId);
     void clearSections();
     void setTexture(ID3D11ShaderResourceView* texture);
@@ -27,11 +28,22 @@ private:
     void createShaders();
     void ensureVertexCapacity(int vertexCount);
     void createStates();
-    void drawBuffer(ID3D11Buffer* buffer, int vertexCount);
+    struct CameraConstants {
+        float mvp[16];
+        float useTexture;
+        float cameraPos[3];
+        float skyColor[4];
+        float fogParams[4];
+    };
+    void drawBuffer(ID3D11Buffer* buffer, int vertexCount, ID3D11ShaderResourceView* texture, bool textureOverride, CameraConstants& constants, bool& textureEnabled);
 
     struct SectionMesh {
         ComPtr<ID3D11Buffer> opaqueBuffer;
         ComPtr<ID3D11Buffer> translucentBuffer;
+        ID3D11ShaderResourceView* opaqueTexture = nullptr;
+        ID3D11ShaderResourceView* translucentTexture = nullptr;
+        bool opaqueTextureOverride = false;
+        bool translucentTextureOverride = false;
         int opaqueVertexCount = 0;
         int translucentVertexCount = 0;
         float centerX = 0.0f;

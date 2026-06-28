@@ -170,6 +170,10 @@ public final class YorGL implements AutoCloseable {
         YorGLNative.worldUploadSectionLayer(handle, sectionId, x, y, z, layer, vertices, floatCount);
     }
 
+    public void worldUploadSectionLayerTextured(long sectionId, int x, int y, int z, int layer, long texture, float[] vertices, int floatCount) {
+        YorGLNative.worldUploadSectionLayerTextured(handle, sectionId, x, y, z, layer, texture, vertices, floatCount);
+    }
+
     public void worldRemoveSection(long sectionId) {
         YorGLNative.worldRemoveSection(handle, sectionId);
     }
