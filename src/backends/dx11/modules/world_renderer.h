@@ -40,12 +40,16 @@ private:
     struct SectionMesh {
         ComPtr<ID3D11Buffer> opaqueBuffer;
         ComPtr<ID3D11Buffer> translucentBuffer;
+        ComPtr<ID3D11Buffer> overlayBuffer;
         ID3D11ShaderResourceView* opaqueTexture = nullptr;
         ID3D11ShaderResourceView* translucentTexture = nullptr;
+        ID3D11ShaderResourceView* overlayTexture = nullptr;
         bool opaqueTextureOverride = false;
         bool translucentTextureOverride = false;
+        bool overlayTextureOverride = false;
         int opaqueVertexCount = 0;
         int translucentVertexCount = 0;
+        int overlayVertexCount = 0;
         float centerX = 0.0f;
         float centerY = 0.0f;
         float centerZ = 0.0f;

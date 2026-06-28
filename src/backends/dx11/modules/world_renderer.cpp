@@ -289,7 +289,12 @@ void WorldRenderer::uploadSectionLayerTextured(long long sectionId, int sectionX
     if (!initialized_ || !data || floatCount <= 0) {
         auto found = sections_.find(sectionId);
         if (found != sections_.end()) {
-            if (layer == 1) {
+            if (layer == 2) {
+                found->second.overlayBuffer.Reset();
+                found->second.overlayVertexCount = 0;
+                found->second.overlayTexture = nullptr;
+                found->second.overlayTextureOverride = false;
+            } else if (layer == 1) {
                 found->second.translucentBuffer.Reset();
                 found->second.translucentVertexCount = 0;
                 found->second.translucentTexture = nullptr;
@@ -300,7 +305,7 @@ void WorldRenderer::uploadSectionLayerTextured(long long sectionId, int sectionX
                 found->second.opaqueTexture = nullptr;
                 found->second.opaqueTextureOverride = false;
             }
-            if (found->second.opaqueVertexCount <= 0 && found->second.translucentVertexCount <= 0) sections_.erase(found);
+            if (found->second.opaqueVertexCount <= 0 && found->second.translucentVertexCount <= 0 && found->second.overlayVertexCount <= 0) sections_.erase(found);
         }
         return;
     }
@@ -319,7 +324,12 @@ void WorldRenderer::uploadSectionLayerTextured(long long sectionId, int sectionX
     mesh.centerX = sectionX * 16.0f + 8.0f;
     mesh.centerY = sectionY * 16.0f + 8.0f;
     mesh.centerZ = sectionZ * 16.0f + 8.0f;
-    if (layer == 1) {
+    if (layer == 2) {
+        mesh.overlayBuffer = buffer;
+        mesh.overlayVertexCount = vertexCount;
+        mesh.overlayTexture = texture;
+        mesh.overlayTextureOverride = texture != nullptr;
+    } else if (layer == 1) {
         mesh.translucentBuffer = buffer;
         mesh.translucentVertexCount = vertexCount;
         mesh.translucentTexture = texture;
@@ -413,8 +423,10 @@ void WorldRenderer::render(float cameraX, float cameraY, float cameraZ,
     if (!sections_.empty()) {
         std::vector<SectionMesh*> opaqueList;
         std::vector<SectionMesh*> translucentList;
+        std::vector<SectionMesh*> overlayList;
         opaqueList.reserve(sections_.size());
         translucentList.reserve(sections_.size());
+        overlayList.reserve(sections_.size());
         Vec3 renderDir = normalize({dirX, 0.0f, dirZ});
         float maxDist = farPlane + 32.0f;
         float maxDistSq = maxDist * maxDist;
@@ -434,6 +446,7 @@ void WorldRenderer::render(float cameraX, float cameraY, float cameraZ,
             }
             if (mesh.opaqueVertexCount > 0) opaqueList.push_back(&mesh);
             if (mesh.translucentVertexCount > 0) translucentList.push_back(&mesh);
+            if (mesh.overlayVertexCount > 0) overlayList.push_back(&mesh);
         }
         auto farToNear = [cameraX, cameraY, cameraZ](const SectionMesh* a, const SectionMesh* b) {
             float ax = a->centerX - cameraX, ay = a->centerY - cameraY, az = a->centerZ - cameraZ;
@@ -442,6 +455,7 @@ void WorldRenderer::render(float cameraX, float cameraY, float cameraZ,
         };
         std::sort(opaqueList.begin(), opaqueList.end(), farToNear);
         std::sort(translucentList.begin(), translucentList.end(), farToNear);
+        std::sort(overlayList.begin(), overlayList.end(), farToNear);
 
         ctx_->OMSetBlendState(blendOff_.Get(), nullptr, 0xFFFFFFFF);
         ctx_->OMSetDepthStencilState(depthOn_.Get(), 0);
@@ -453,6 +467,9 @@ void WorldRenderer::render(float cameraX, float cameraY, float cameraZ,
         ctx_->OMSetDepthStencilState(depthRead_.Get(), 0);
         for (auto* mesh : translucentList) {
             drawBuffer(mesh->translucentBuffer.Get(), mesh->translucentVertexCount, mesh->translucentTexture, mesh->translucentTextureOverride, constants, textureEnabled);
+        }
+        for (auto* mesh : overlayList) {
+            drawBuffer(mesh->overlayBuffer.Get(), mesh->overlayVertexCount, mesh->overlayTexture, mesh->overlayTextureOverride, constants, textureEnabled);
         }
     } else {
         ctx_->OMSetBlendState(blendOff_.Get(), nullptr, 0xFFFFFFFF);

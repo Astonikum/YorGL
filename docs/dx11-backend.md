@@ -16,7 +16,7 @@ The DirectX 11 backend lives in `src/backends/dx11`.
 ## Modules
 
 - `modules/gui_renderer.*` draws screen-space colored, textured, gradient, SDF, scissored, and blurred rectangles.
-- `modules/world_renderer.*` draws generic 3D mesh sections with opaque and translucent layers. Uploaded section layers are stored in default-usage D3D11 vertex buffers because chunk data is static between explicit uploads.
+- `modules/world_renderer.*` draws generic 3D mesh sections with opaque, translucent, and translucent overlay layers. Uploaded section layers are stored in default-usage D3D11 vertex buffers because chunk data is static between explicit uploads.
 - The world renderer supports nearest and linear atlas sampling; nearest remains the default for pixel-art atlases.
 - `modules/cubemap_renderer.*` draws six texture handles as an inside-out cube.
 - `modules/sdf_font.*` bakes TTF bytes into an SDF atlas and exposes glyph metrics.
