@@ -20,6 +20,15 @@ public final class Scene {
         return Collections.unmodifiableList(objects);
     }
 
+    public boolean removeObject(SceneObject object) {
+        boolean removed = objects.remove(object);
+        if (removed) {
+            object.onChange(() -> {});
+            touch();
+        }
+        return removed;
+    }
+
     public void update(float deltaSeconds) {
         for (SceneObject object : objects) {
             object.update(deltaSeconds);

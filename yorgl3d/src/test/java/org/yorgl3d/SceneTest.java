@@ -22,6 +22,23 @@ public final class SceneTest {
         if (scene.version() <= version) {
             throw new AssertionError("scene version did not advance after transform change");
         }
+
+        version = scene.version();
+        SceneObject object = scene.objects().get(0).property("minecraft:id", "zombie");
+        if (!"zombie".equals(object.property("minecraft:id").orElseThrow())) {
+            throw new AssertionError("scene object property missing");
+        }
+        if (scene.version() <= version) {
+            throw new AssertionError("scene version did not advance after property change");
+        }
+
+        version = scene.version();
+        if (!scene.removeObject(object) || !scene.objects().isEmpty()) {
+            throw new AssertionError("scene object removal failed");
+        }
+        if (scene.version() <= version) {
+            throw new AssertionError("scene version did not advance after object removal");
+        }
     }
 
     private static void assertClose(float expected, float actual) {

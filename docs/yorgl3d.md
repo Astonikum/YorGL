@@ -7,10 +7,12 @@ pipeline, and no engine loop ownership.
 ## Scope
 
 - `Scene` owns a flat list of `SceneObject`s and updates active objects.
-- `SceneObject` owns one `Transform` and a small component list.
+- `SceneObject` owns one `Transform`, a small component list, and a string-keyed
+  custom property map for client metadata such as source ids or editor tags.
 - `Component` and `Script` provide attach/update hooks.
 - `Scene.version()` increments when objects, active state, components, or
-  transforms change, so clients can skip redundant scene bakes/uploads.
+  transforms, properties, or removals change, so clients can skip redundant
+  scene bakes/uploads.
 - `MeshComponent` stores local `x,y,z,r,g,b,a,u,v` vertices and bakes them to
   world-space vertices accepted by YorGL world rendering.
 - `Camera` and `Light` hold low-level scene data for clients that want to keep

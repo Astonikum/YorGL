@@ -2,12 +2,15 @@ package org.yorgl3d;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public final class SceneObject {
     private final Transform transform = new Transform();
     private final List<Component> components = new ArrayList<>();
+    private final Map<String, Object> properties = new HashMap<>();
     private Runnable onChange = () -> {};
     private boolean active = true;
 
@@ -43,6 +46,27 @@ public final class SceneObject {
 
     public List<Component> components() {
         return Collections.unmodifiableList(components);
+    }
+
+    public SceneObject property(String key, Object value) {
+        if (key == null || key.isBlank()) {
+            throw new IllegalArgumentException("Property key must not be blank");
+        }
+        if (value == null) {
+            properties.remove(key);
+        } else {
+            properties.put(key, value);
+        }
+        touch();
+        return this;
+    }
+
+    public Optional<Object> property(String key) {
+        return Optional.ofNullable(properties.get(key));
+    }
+
+    public Map<String, Object> properties() {
+        return Collections.unmodifiableMap(properties);
     }
 
     void update(float deltaSeconds) {
