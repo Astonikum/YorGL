@@ -46,7 +46,7 @@ public:
     void guiBlurRect(float x, float y, float w, float h, int passes) override;
     void guiEnd() override;
 
-    void panoramaRender(const std::int64_t* faces, float angle, int width, int height) override;
+    void cubemapRender(const std::int64_t* faces, float yawRadians, int width, int height) override;
 
     void worldUploadMesh(const float* vertices, int floatCount) override;
     void worldUploadSection(std::int64_t sectionId, int x, int y, int z, const float* vertices, int floatCount) override;
@@ -79,7 +79,7 @@ private:
     Microsoft::WRL::ComPtr<ID3D11DepthStencilView> dsv_;
     Microsoft::WRL::ComPtr<ID3D11Texture2D> depthBuffer_;
     GuiRenderer gui_;
-    CubemapRenderer panorama_;
+    CubemapRenderer cubemap_;
     WorldRenderer world_;
     int width_ = 0;
     int height_ = 0;

@@ -134,8 +134,8 @@ void CubemapRenderer::createShaders() {
 }
 
 void CubemapRenderer::createGeometry() {
-    // Inverted unit cube (camera inside looking out). 6 faces Г— 2 triangles Г— 3 verts = 36.
-    // MC panorama face order: front(0), right(1), back(2), left(3), top(4), bottom(5)
+    // Inverted unit cube (camera inside looking out). 6 faces x 2 triangles x 3 verts = 36.
+    // Face order: front(0), right(1), back(2), left(3), top(4), bottom(5).
     CubeVertex verts[36];
     int idx = 0;
 

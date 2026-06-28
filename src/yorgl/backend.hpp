@@ -82,7 +82,10 @@ public:
     virtual void guiBlurRect(float, float, float, float, int) {}
     virtual void guiEnd() {}
 
-    virtual void panoramaRender(const std::int64_t*, float, int, int) {}
+    virtual void cubemapRender(const std::int64_t*, float, int, int) {}
+    virtual void panoramaRender(const std::int64_t* faces, float yawRadians, int width, int height) {
+        cubemapRender(faces, yawRadians, width, height);
+    }
 
     virtual void worldUploadMesh(const float*, int) {}
     virtual void worldUploadSection(std::int64_t, int, int, int, const float*, int) {}

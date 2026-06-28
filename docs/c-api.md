@@ -45,6 +45,13 @@ These calls render screen-space quads through the active backend. They are rende
 - `yorglGuiBlurRect`
 - `yorglGuiEnd`
 
+## Cubemap Rendering
+
+`yorglCubemapRender(renderer, faces6, yawRadians, width, height)` draws six
+texture handles as an inside-out cube. Face order is front, right, back, left,
+top, bottom. `yorglPanoramaRender` remains as a compatibility alias for older
+clients.
+
 ## World Rendering
 
 World rendering is generic mesh rendering. YorGL does not know about Minecraft chunks; callers provide mesh identifiers, positions, vertices, camera direction, FOV, far plane, and texture handles.

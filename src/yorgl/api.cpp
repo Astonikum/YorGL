@@ -188,8 +188,12 @@ void yorglGuiEnd(YorGLRenderer* renderer) {
     if (auto* b = backend(renderer)) b->guiEnd();
 }
 
+void yorglCubemapRender(YorGLRenderer* renderer, const int64_t* faces6, float yawRadians, int width, int height) {
+    if (auto* b = backend(renderer)) b->cubemapRender(faces6, yawRadians, width, height);
+}
+
 void yorglPanoramaRender(YorGLRenderer* renderer, const int64_t* faces6, float angle, int width, int height) {
-    if (auto* b = backend(renderer)) b->panoramaRender(faces6, angle, width, height);
+    yorglCubemapRender(renderer, faces6, angle, width, height);
 }
 
 void yorglWorldUploadMesh(YorGLRenderer* renderer, const float* vertices, int floatCount) {

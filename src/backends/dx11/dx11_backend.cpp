@@ -56,7 +56,7 @@ bool Dx11Backend::init() {
 
 void Dx11Backend::shutdown() {
     gui_.shutdown();
-    panorama_.shutdown();
+    cubemap_.shutdown();
     world_.shutdown();
     dsv_.Reset();
     depthBuffer_.Reset();
@@ -96,7 +96,7 @@ bool Dx11Backend::createSwapChain(std::int64_t windowHandle, const SwapChainOpti
 
     createRenderTarget();
     gui_.init(device_.Get(), context_.Get());
-    panorama_.init(device_.Get(), context_.Get());
+    cubemap_.init(device_.Get(), context_.Get());
     world_.init(device_.Get(), context_.Get());
     return rtv_ != nullptr && dsv_ != nullptr;
 }
@@ -240,7 +240,7 @@ void Dx11Backend::guiSetSdfParams(float edge, float softness, float weightBias) 
 void Dx11Backend::guiBlurRect(float x, float y, float w, float h, int passes) { gui_.blurRect(x, y, w, h, passes, rtv_.Get()); }
 void Dx11Backend::guiEnd() { gui_.end(); }
 
-void Dx11Backend::panoramaRender(const std::int64_t* faces, float angle, int width, int height) {
+void Dx11Backend::cubemapRender(const std::int64_t* faces, float yawRadians, int width, int height) {
     if (!faces) return;
     ID3D11ShaderResourceView* srv[6] = {
         reinterpret_cast<ID3D11ShaderResourceView*>(faces[0]),
@@ -251,7 +251,7 @@ void Dx11Backend::panoramaRender(const std::int64_t* faces, float angle, int wid
         reinterpret_cast<ID3D11ShaderResourceView*>(faces[5]),
     };
     gui_.flush();
-    panorama_.render(srv, angle, width, height, rtv_.Get());
+    cubemap_.render(srv, yawRadians, width, height, rtv_.Get());
 }
 
 void Dx11Backend::worldUploadMesh(const float* vertices, int floatCount) { world_.uploadMesh(vertices, floatCount); }

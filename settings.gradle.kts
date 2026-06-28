@@ -13,3 +13,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "yorgl"
+include("yorgl3d")

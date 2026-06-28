@@ -10,7 +10,7 @@ The DirectX 11 backend lives in `src/backends/dx11`.
 - select `VSync` or `Immediate` present mode, using DXGI tearing only when supported;
 - store the last resize/present HRESULT and device-removed reason for client diagnostics;
 - own render target and depth target resources;
-- host DX11 implementations of GUI, panorama, world mesh, texture upload/update, and SDF font modules;
+- host DX11 implementations of GUI, cubemap, world mesh, texture upload/update, and SDF font modules;
 - present frames through the swap chain.
 
 ## Modules
@@ -18,7 +18,7 @@ The DirectX 11 backend lives in `src/backends/dx11`.
 - `modules/gui_renderer.*` draws screen-space colored, textured, gradient, SDF, scissored, and blurred rectangles.
 - `modules/world_renderer.*` draws generic 3D mesh sections with opaque and translucent layers. Uploaded section layers are stored in default-usage D3D11 vertex buffers because chunk data is static between explicit uploads.
 - The world renderer supports nearest and linear atlas sampling; nearest remains the default for pixel-art atlases.
-- `modules/cubemap_renderer.*` draws six texture handles as a panorama.
+- `modules/cubemap_renderer.*` draws six texture handles as an inside-out cube.
 - `modules/sdf_font.*` bakes TTF bytes into an SDF atlas and exposes glyph metrics.
 - `modules/yorgl_log.hpp` provides minimal backend logging.
 

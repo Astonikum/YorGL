@@ -13,6 +13,10 @@ Current backend modules:
 
 YorGL does not ship a retained UI toolkit. It exposes low-level drawing calls only; game engines own their menus, widgets, input, layout, animation, and styling.
 
+`yorgl3d` is an optional JVM module with low-level scene objects, transforms,
+components, scripts, cameras, lights, and mesh baking helpers for clients that
+want a small object/component layer above the raw renderer.
+
 Planned backends are added only when they render something real.
 
 ## Documentation
@@ -20,6 +24,7 @@ Planned backends are added only when they render something real.
 - [Architecture](docs/architecture.md)
 - [C API](docs/c-api.md)
 - [Java Binding](docs/java-binding.md)
+- [YorGL3D](docs/yorgl3d.md)
 - [DX11 Backend](docs/dx11-backend.md)
 - [Security Policy](SECURITY.md)
 
@@ -36,6 +41,7 @@ sourceControl {
 // build.gradle.kts
 dependencies {
     implementation("org.yorgl:yorgl:0.1.0-SNAPSHOT")
+    implementation("org.yorgl:yorgl3d:0.1.0-SNAPSHOT")
 }
 ```
 

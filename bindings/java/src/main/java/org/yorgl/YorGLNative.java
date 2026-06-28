@@ -32,6 +32,7 @@ final class YorGLNative {
     static native void guiSetSdfParams(long ptr, float edge, float softness, float weightBias);
     static native void guiBlurRect(long ptr, float x, float y, float w, float h, int passes);
     static native void guiEnd(long ptr);
+    static native void cubemapRender(long ptr, long[] faces, float yawRadians, int width, int height);
     static native void panoramaRender(long ptr, long[] faces, float angle, int width, int height);
     static native void worldUploadMesh(long ptr, float[] vertices, int floatCount);
     static native void worldUploadSection(long ptr, long sectionId, int x, int y, int z, float[] vertices, int floatCount);

@@ -79,6 +79,7 @@ YORGL_API void yorglGuiSetSdfParams(YorGLRenderer* renderer, float edge, float s
 YORGL_API void yorglGuiBlurRect(YorGLRenderer* renderer, float x, float y, float w, float h, int passes);
 YORGL_API void yorglGuiEnd(YorGLRenderer* renderer);
 
+YORGL_API void yorglCubemapRender(YorGLRenderer* renderer, const int64_t* faces6, float yawRadians, int width, int height);
 YORGL_API void yorglPanoramaRender(YorGLRenderer* renderer, const int64_t* faces6, float angle, int width, int height);
 
 YORGL_API void yorglWorldUploadMesh(YorGLRenderer* renderer, const float* vertices, int floatCount);

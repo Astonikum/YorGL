@@ -150,8 +150,12 @@ public final class YorGL implements AutoCloseable {
         YorGLNative.guiEnd(handle);
     }
 
+    public void cubemapRender(long[] faces, float yawRadians, int width, int height) {
+        YorGLNative.cubemapRender(handle, faces, yawRadians, width, height);
+    }
+
     public void panoramaRender(long[] faces, float angle, int width, int height) {
-        YorGLNative.panoramaRender(handle, faces, angle, width, height);
+        cubemapRender(faces, angle, width, height);
     }
 
     public void worldUploadMesh(float[] vertices, int floatCount) {

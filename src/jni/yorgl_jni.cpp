@@ -160,11 +160,15 @@ JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_guiEnd(JNIEnv*, jclass, jlong 
     yorglGuiEnd(handle(ptr));
 }
 
-JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_panoramaRender(JNIEnv* env, jclass, jlong ptr, jlongArray faces, jfloat angle, jint width, jint height) {
+JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_cubemapRender(JNIEnv* env, jclass, jlong ptr, jlongArray faces, jfloat yawRadians, jint width, jint height) {
     if (!faces || env->GetArrayLength(faces) < 6) return;
     jlong* values = env->GetLongArrayElements(faces, nullptr);
-    yorglPanoramaRender(handle(ptr), reinterpret_cast<const int64_t*>(values), angle, width, height);
+    yorglCubemapRender(handle(ptr), reinterpret_cast<const int64_t*>(values), yawRadians, width, height);
     env->ReleaseLongArrayElements(faces, values, JNI_ABORT);
+}
+
+JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_panoramaRender(JNIEnv* env, jclass cls, jlong ptr, jlongArray faces, jfloat angle, jint width, jint height) {
+    Java_org_yorgl_YorGLNative_cubemapRender(env, cls, ptr, faces, angle, width, height);
 }
 
 JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_worldUploadMesh(JNIEnv* env, jclass, jlong ptr, jfloatArray vertices, jint floatCount) {

@@ -47,7 +47,7 @@ The Java class mirrors the C API:
 - present mode control through `PresentMode.VSync` and `PresentMode.Immediate`;
 - texture upload, region update, and release;
 - screen-space quads, gradients, scissor, blur, and SDF mode;
-- panorama rendering;
+- cubemap rendering through `cubemapRender`; `panoramaRender` remains as a compatibility alias;
 - world mesh upload, section layer upload, texture binding, texture filter, sky color, render;
 - SDF font atlas, metrics, glyphs, kerning, text measurement, and text drawing.
 
