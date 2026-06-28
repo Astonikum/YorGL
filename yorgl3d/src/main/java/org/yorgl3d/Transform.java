@@ -4,6 +4,7 @@ public final class Transform {
     private Vec3 position = Vec3.ZERO;
     private Vec3 rotationRadians = Vec3.ZERO;
     private Vec3 scale = Vec3.ONE;
+    private Runnable onChange = () -> {};
 
     public Vec3 position() {
         return position;
@@ -11,6 +12,7 @@ public final class Transform {
 
     public Transform position(float x, float y, float z) {
         position = new Vec3(x, y, z);
+        onChange.run();
         return this;
     }
 
@@ -20,6 +22,7 @@ public final class Transform {
 
     public Transform rotationRadians(float x, float y, float z) {
         rotationRadians = new Vec3(x, y, z);
+        onChange.run();
         return this;
     }
 
@@ -29,7 +32,12 @@ public final class Transform {
 
     public Transform scale(float x, float y, float z) {
         scale = new Vec3(x, y, z);
+        onChange.run();
         return this;
+    }
+
+    void onChange(Runnable onChange) {
+        this.onChange = onChange;
     }
 
     public float[] matrix() {

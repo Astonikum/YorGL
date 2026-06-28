@@ -16,6 +16,12 @@ public final class SceneTest {
         assertClose(4.0f, baked[1]);
         assertClose(-1.0f, baked[2]);
         assertClose(1.0f, baked[3]);
+
+        long version = scene.version();
+        scene.objects().get(0).transform().position(0.0f, 0.0f, 0.0f);
+        if (scene.version() <= version) {
+            throw new AssertionError("scene version did not advance after transform change");
+        }
     }
 
     private static void assertClose(float expected, float actual) {

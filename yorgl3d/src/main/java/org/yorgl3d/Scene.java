@@ -6,10 +6,13 @@ import java.util.List;
 
 public final class Scene {
     private final List<SceneObject> objects = new ArrayList<>();
+    private long version = 1;
 
     public SceneObject createObject() {
         SceneObject object = new SceneObject();
+        object.onChange(this::touch);
         objects.add(object);
+        touch();
         return object;
     }
 
@@ -23,6 +26,10 @@ public final class Scene {
         }
     }
 
+    public long version() {
+        return version;
+    }
+
     public float[] bakeWorldVertices() {
         FloatList out = new FloatList();
         for (SceneObject object : objects) {
@@ -30,5 +37,9 @@ public final class Scene {
             object.component(MeshComponent.class).ifPresent(mesh -> mesh.appendWorldVertices(object.transform(), out));
         }
         return out.toArray();
+    }
+
+    private void touch() {
+        version++;
     }
 }
