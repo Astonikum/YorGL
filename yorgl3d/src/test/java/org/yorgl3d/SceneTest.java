@@ -46,6 +46,18 @@ public final class SceneTest {
             throw new AssertionError("scene object typed component removal failed");
         }
 
+        Component selfRemoving = new Component() {
+            @Override
+            public void update(SceneObject updated, float deltaSeconds) {
+                updated.remove(this);
+            }
+        };
+        object.add(selfRemoving);
+        scene.update(0.016f);
+        if (object.component(selfRemoving.getClass()).isPresent()) {
+            throw new AssertionError("scene object component self-removal failed");
+        }
+
         version = scene.version();
         if (!scene.removeObject(object) || !scene.objects().isEmpty()) {
             throw new AssertionError("scene object removal failed");

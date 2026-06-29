@@ -11,6 +11,8 @@ pipeline, and no engine loop ownership.
   string-keyed custom property map for client metadata such as source ids or
   editor tags.
 - `Component` and `Script` provide attach/update hooks.
+- Component updates iterate over a frame-local snapshot, so a component can add
+  or remove components during its own update without invalidating the tick.
 - `Scene.version()` increments when objects, active state, components, or
   transforms, properties, or removals change, so clients can skip redundant
   scene bakes/uploads.

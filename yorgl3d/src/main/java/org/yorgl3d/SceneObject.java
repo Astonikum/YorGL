@@ -88,7 +88,7 @@ public final class SceneObject {
 
     void update(float deltaSeconds) {
         if (!active) return;
-        for (Component component : components) {
+        for (Component component : new ArrayList<>(components)) {
             component.update(this, deltaSeconds);
         }
     }
