@@ -44,6 +44,23 @@ public final class SceneObject {
         return components.stream().filter(type::isInstance).map(type::cast).findFirst();
     }
 
+    public boolean remove(Component component) {
+        boolean removed = components.remove(component);
+        if (removed) {
+            touch();
+        }
+        return removed;
+    }
+
+    public <T extends Component> boolean remove(Class<T> type) {
+        for (Component component : components) {
+            if (type.isInstance(component)) {
+                return remove(component);
+            }
+        }
+        return false;
+    }
+
     public List<Component> components() {
         return Collections.unmodifiableList(components);
     }

@@ -7,8 +7,9 @@ pipeline, and no engine loop ownership.
 ## Scope
 
 - `Scene` owns a flat list of `SceneObject`s and updates active objects.
-- `SceneObject` owns one `Transform`, a small component list, and a string-keyed
-  custom property map for client metadata such as source ids or editor tags.
+- `SceneObject` owns one `Transform`, a small add/remove component list, and a
+  string-keyed custom property map for client metadata such as source ids or
+  editor tags.
 - `Component` and `Script` provide attach/update hooks.
 - `Scene.version()` increments when objects, active state, components, or
   transforms, properties, or removals change, so clients can skip redundant

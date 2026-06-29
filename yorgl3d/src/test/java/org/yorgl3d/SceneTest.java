@@ -32,6 +32,20 @@ public final class SceneTest {
             throw new AssertionError("scene version did not advance after property change");
         }
 
+        MeshComponent mesh = object.component(MeshComponent.class).orElseThrow();
+        version = scene.version();
+        if (!object.remove(mesh) || object.component(MeshComponent.class).isPresent()) {
+            throw new AssertionError("scene object component removal failed");
+        }
+        if (scene.version() <= version) {
+            throw new AssertionError("scene version did not advance after component removal");
+        }
+
+        object.add(mesh);
+        if (!object.remove(MeshComponent.class) || object.component(MeshComponent.class).isPresent()) {
+            throw new AssertionError("scene object typed component removal failed");
+        }
+
         version = scene.version();
         if (!scene.removeObject(object) || !scene.objects().isEmpty()) {
             throw new AssertionError("scene object removal failed");
