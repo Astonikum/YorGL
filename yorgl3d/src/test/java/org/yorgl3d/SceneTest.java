@@ -46,6 +46,29 @@ public final class SceneTest {
             throw new AssertionError("scene object typed component removal failed");
         }
 
+        SceneObject parent = scene.createObject();
+        parent.transform().position(10.0f, 0.0f, 0.0f);
+        SceneObject child = scene.createObject(parent);
+        child.transform().position(1.0f, 0.0f, 0.0f);
+        Material material = new Material().name("debug").color(0.5f, 0.25f, 1.0f, 1.0f);
+        MeshComponent childMesh = new MeshComponent(new float[] {
+            2, 0, 0, 1, 1, 1, 1, 0, 0
+        }).material(material);
+        child.add(childMesh);
+        baked = scene.bakeWorldVertices();
+        assertClose(13.0f, baked[baked.length - 9]);
+        if (child.parent().orElseThrow() != parent || !parent.children().contains(child)) {
+            throw new AssertionError("scene object parent/child link missing");
+        }
+        if (childMesh.material() != material) {
+            throw new AssertionError("mesh material reference missing");
+        }
+        if (!parent.removeChild(child) || child.parent().isPresent()) {
+            throw new AssertionError("scene object child removal failed");
+        }
+        scene.removeObject(child);
+        scene.removeObject(parent);
+
         Component selfRemoving = new Component() {
             @Override
             public void update(SceneObject updated, float deltaSeconds) {

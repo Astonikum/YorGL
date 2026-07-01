@@ -16,6 +16,12 @@ public final class Scene {
         return object;
     }
 
+    public SceneObject createObject(SceneObject parent) {
+        SceneObject object = createObject();
+        parent.addChild(object);
+        return object;
+    }
+
     public List<SceneObject> objects() {
         return Collections.unmodifiableList(objects);
     }
@@ -23,6 +29,10 @@ public final class Scene {
     public boolean removeObject(SceneObject object) {
         boolean removed = objects.remove(object);
         if (removed) {
+            object.parent().ifPresent(parent -> parent.removeChild(object));
+            for (SceneObject child : new ArrayList<>(object.children())) {
+                object.removeChild(child);
+            }
             object.onChange(() -> {});
             touch();
         }
@@ -43,7 +53,7 @@ public final class Scene {
         FloatList out = new FloatList();
         for (SceneObject object : objects) {
             if (!object.active()) continue;
-            object.component(MeshComponent.class).ifPresent(mesh -> mesh.appendWorldVertices(object.transform(), out));
+            object.component(MeshComponent.class).ifPresent(mesh -> mesh.appendWorldVertices(object, out));
         }
         return out.toArray();
     }

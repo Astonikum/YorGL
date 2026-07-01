@@ -5,6 +5,7 @@ import java.util.Arrays;
 public final class MeshComponent implements Component {
     public static final int STRIDE_FLOATS = 9;
     private final float[] localVertices;
+    private Material material;
 
     public MeshComponent(float[] localVertices) {
         if (localVertices.length % STRIDE_FLOATS != 0) {
@@ -17,8 +18,17 @@ public final class MeshComponent implements Component {
         return Arrays.copyOf(localVertices, localVertices.length);
     }
 
-    void appendWorldVertices(Transform transform, FloatList out) {
-        float[] m = transform.matrix();
+    public MeshComponent material(Material material) {
+        this.material = material;
+        return this;
+    }
+
+    public Material material() {
+        return material;
+    }
+
+    void appendWorldVertices(SceneObject object, FloatList out) {
+        float[] m = object.worldMatrix();
         for (int i = 0; i < localVertices.length; i += STRIDE_FLOATS) {
             float x = localVertices[i];
             float y = localVertices[i + 1];
