@@ -69,6 +69,33 @@ public final class SceneTest {
         scene.removeObject(child);
         scene.removeObject(parent);
 
+        Camera camera = new Camera()
+            .aspectRatio(4.0f / 3.0f)
+            .nearPlane(0.1f)
+            .farPlane(1024.0f)
+            .fovYDegrees(75.0f);
+        Light light = new Light(Light.Kind.SPOT)
+            .color(0.8f, 0.9f, 1.0f)
+            .intensity(2.0f)
+            .range(32.0f)
+            .cone(15.0f, 45.0f);
+        SceneObject cameraObject = scene.createObject(camera);
+        SceneObject lightObject = scene.createObject(light);
+        if (scene.activeCamera().orElseThrow() != camera || camera.object().orElseThrow() != cameraObject) {
+            throw new AssertionError("scene camera registration failed");
+        }
+        if (!scene.lights().contains(light) || light.object().orElseThrow() != lightObject) {
+            throw new AssertionError("scene light registration failed");
+        }
+        if (Math.abs(light.rgba()[2] - 2.0f) > 0.0001f || light.outerConeDegrees() != 45.0f) {
+            throw new AssertionError("scene light data failed");
+        }
+        if (cameraObject.componentOrNull(Camera.class) != camera || cameraObject.requireComponent(Camera.class) != camera) {
+            throw new AssertionError("kotlin-friendly component lookup failed");
+        }
+        scene.removeObject(cameraObject);
+        scene.removeObject(lightObject);
+
         Component selfRemoving = new Component() {
             @Override
             public void update(SceneObject updated, float deltaSeconds) {

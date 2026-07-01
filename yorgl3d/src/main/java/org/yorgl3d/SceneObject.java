@@ -79,14 +79,32 @@ public final class SceneObject {
     }
 
     public SceneObject add(Component component) {
+        if (component == null) {
+            throw new IllegalArgumentException("Component must not be null");
+        }
         components.add(component);
         component.onAttach(this);
         touch();
         return this;
     }
 
+    public SceneObject add(Component... components) {
+        for (Component component : components) {
+            add(component);
+        }
+        return this;
+    }
+
     public <T extends Component> Optional<T> component(Class<T> type) {
         return components.stream().filter(type::isInstance).map(type::cast).findFirst();
+    }
+
+    public <T extends Component> T componentOrNull(Class<T> type) {
+        return component(type).orElse(null);
+    }
+
+    public <T extends Component> T requireComponent(Class<T> type) {
+        return component(type).orElseThrow(() -> new IllegalStateException("Missing component " + type.getName()));
     }
 
     public boolean remove(Component component) {
