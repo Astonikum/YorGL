@@ -57,6 +57,7 @@ public:
     void worldSetTexture(std::int64_t texture) override;
     void worldSetTextureFilter(TextureFilter filter) override;
     void worldSetSkyColor(float r, float g, float b) override;
+    void worldSetFog(float r, float g, float b, float start, float end) override;
     void worldRender(float cameraX, float cameraY, float cameraZ, float dirX, float dirY, float dirZ, float fovYDegrees, float farPlane, int width, int height) override;
 
     std::int64_t sdfFontCreate(const std::uint8_t* ttfData, int byteCount, float fontSize) override;

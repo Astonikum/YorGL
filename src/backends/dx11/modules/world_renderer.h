@@ -20,6 +20,7 @@ public:
     void setTexture(ID3D11ShaderResourceView* texture);
     void setTextureFilter(yorgl::TextureFilter filter);
     void setSkyColor(float r, float g, float b);
+    void setFog(float r, float g, float b, float start, float end);
     void render(float cameraX, float cameraY, float cameraZ,
                 float dirX, float dirY, float dirZ, float fovYDegrees, float farPlane, int screenW, int screenH,
                 ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* dsv);
@@ -82,6 +83,10 @@ private:
     int vertexCount_ = 0;
     std::unordered_map<long long, SectionMesh> sections_;
     float skyColor_[4] = {0.10f, 0.13f, 0.16f, 1.0f};
+    float fogColor_[4] = {0.10f, 0.13f, 0.16f, 1.0f};
+    float fogStart_ = -1.0f;
+    float fogEnd_ = -1.0f;
+    bool fogConfigured_ = false;
     ID3D11ShaderResourceView* texture_ = nullptr;
     yorgl::TextureFilter textureFilter_ = yorgl::TextureFilter::Nearest;
     bool initialized_ = false;

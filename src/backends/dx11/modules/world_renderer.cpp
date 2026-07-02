@@ -390,6 +390,22 @@ void WorldRenderer::setSkyColor(float r, float g, float b) {
     skyColor_[1] = g;
     skyColor_[2] = b;
     skyColor_[3] = 1.0f;
+    if (!fogConfigured_) {
+        fogColor_[0] = r;
+        fogColor_[1] = g;
+        fogColor_[2] = b;
+        fogColor_[3] = 1.0f;
+    }
+}
+
+void WorldRenderer::setFog(float r, float g, float b, float start, float end) {
+    fogConfigured_ = true;
+    fogColor_[0] = r;
+    fogColor_[1] = g;
+    fogColor_[2] = b;
+    fogColor_[3] = 1.0f;
+    fogStart_ = start;
+    fogEnd_ = end;
 }
 
 void WorldRenderer::render(float cameraX, float cameraY, float cameraZ,
@@ -416,12 +432,14 @@ void WorldRenderer::render(float cameraX, float cameraY, float cameraZ,
     constants.cameraPos[0] = cameraX;
     constants.cameraPos[1] = cameraY;
     constants.cameraPos[2] = cameraZ;
-    constants.skyColor[0] = skyColor_[0];
-    constants.skyColor[1] = skyColor_[1];
-    constants.skyColor[2] = skyColor_[2];
+    const float fogStart = fogStart_ >= 0.0f ? fogStart_ : farPlane * 0.72f;
+    const float fogEnd = fogEnd_ > fogStart ? fogEnd_ : farPlane;
+    constants.skyColor[0] = fogColor_[0];
+    constants.skyColor[1] = fogColor_[1];
+    constants.skyColor[2] = fogColor_[2];
     constants.skyColor[3] = 1.0f;
-    constants.fogParams[0] = farPlane * 0.72f;
-    constants.fogParams[1] = farPlane;
+    constants.fogParams[0] = fogStart;
+    constants.fogParams[1] = fogEnd;
     constants.fogParams[2] = constants.fogParams[3] = 0.0f;
     D3D11_MAPPED_SUBRESOURCE mapped;
     if (SUCCEEDED(ctx_->Map(constantBuffer_.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped))) {
