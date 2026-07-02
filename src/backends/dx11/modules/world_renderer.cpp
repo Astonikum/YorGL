@@ -148,7 +148,7 @@ void WorldRenderer::shutdown() {
     vs_.Reset(); ps_.Reset(); inputLayout_.Reset();
     vertexBuffer_.Reset(); constantBuffer_.Reset(); rasterState_.Reset();
     depthOn_.Reset(); depthRead_.Reset();
-    depthOff_.Reset(); blendOff_.Reset(); blendOn_.Reset(); samplerPoint_.Reset(); samplerLinear_.Reset();
+    depthOff_.Reset(); blendOff_.Reset(); blendOn_.Reset(); blendAdditive_.Reset(); samplerPoint_.Reset(); samplerLinear_.Reset();
     vertexCapacity_ = 0;
     vertexCount_ = 0;
     sections_.clear();
@@ -244,6 +244,17 @@ void WorldRenderer::createStates() {
     bdAlpha.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
     device_->CreateBlendState(&bdAlpha, &blendOn_);
 
+    D3D11_BLEND_DESC bdAdd = {};
+    bdAdd.RenderTarget[0].BlendEnable = TRUE;
+    bdAdd.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+    bdAdd.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+    bdAdd.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+    bdAdd.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+    bdAdd.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
+    bdAdd.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+    bdAdd.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+    device_->CreateBlendState(&bdAdd, &blendAdditive_);
+
     D3D11_SAMPLER_DESC sd = {};
     sd.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
     sd.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
@@ -289,7 +300,12 @@ void WorldRenderer::uploadSectionLayerTextured(long long sectionId, int sectionX
     if (!initialized_ || !data || floatCount <= 0) {
         auto found = sections_.find(sectionId);
         if (found != sections_.end()) {
-            if (layer == 2) {
+            if (layer == 3) {
+                found->second.effectBuffer.Reset();
+                found->second.effectVertexCount = 0;
+                found->second.effectTexture = nullptr;
+                found->second.effectTextureOverride = false;
+            } else if (layer == 2) {
                 found->second.overlayBuffer.Reset();
                 found->second.overlayVertexCount = 0;
                 found->second.overlayTexture = nullptr;
@@ -305,7 +321,10 @@ void WorldRenderer::uploadSectionLayerTextured(long long sectionId, int sectionX
                 found->second.opaqueTexture = nullptr;
                 found->second.opaqueTextureOverride = false;
             }
-            if (found->second.opaqueVertexCount <= 0 && found->second.translucentVertexCount <= 0 && found->second.overlayVertexCount <= 0) sections_.erase(found);
+            if (found->second.opaqueVertexCount <= 0 &&
+                found->second.translucentVertexCount <= 0 &&
+                found->second.overlayVertexCount <= 0 &&
+                found->second.effectVertexCount <= 0) sections_.erase(found);
         }
         return;
     }
@@ -324,7 +343,12 @@ void WorldRenderer::uploadSectionLayerTextured(long long sectionId, int sectionX
     mesh.centerX = sectionX * 16.0f + 8.0f;
     mesh.centerY = sectionY * 16.0f + 8.0f;
     mesh.centerZ = sectionZ * 16.0f + 8.0f;
-    if (layer == 2) {
+    if (layer == 3) {
+        mesh.effectBuffer = buffer;
+        mesh.effectVertexCount = vertexCount;
+        mesh.effectTexture = texture;
+        mesh.effectTextureOverride = texture != nullptr;
+    } else if (layer == 2) {
         mesh.overlayBuffer = buffer;
         mesh.overlayVertexCount = vertexCount;
         mesh.overlayTexture = texture;
@@ -424,9 +448,11 @@ void WorldRenderer::render(float cameraX, float cameraY, float cameraZ,
         std::vector<SectionMesh*> opaqueList;
         std::vector<SectionMesh*> translucentList;
         std::vector<SectionMesh*> overlayList;
+        std::vector<SectionMesh*> effectList;
         opaqueList.reserve(sections_.size());
         translucentList.reserve(sections_.size());
         overlayList.reserve(sections_.size());
+        effectList.reserve(sections_.size());
         Vec3 renderDir = normalize({dirX, 0.0f, dirZ});
         float maxDist = farPlane + 32.0f;
         float maxDistSq = maxDist * maxDist;
@@ -447,6 +473,7 @@ void WorldRenderer::render(float cameraX, float cameraY, float cameraZ,
             if (mesh.opaqueVertexCount > 0) opaqueList.push_back(&mesh);
             if (mesh.translucentVertexCount > 0) translucentList.push_back(&mesh);
             if (mesh.overlayVertexCount > 0) overlayList.push_back(&mesh);
+            if (mesh.effectVertexCount > 0) effectList.push_back(&mesh);
         }
         auto farToNear = [cameraX, cameraY, cameraZ](const SectionMesh* a, const SectionMesh* b) {
             float ax = a->centerX - cameraX, ay = a->centerY - cameraY, az = a->centerZ - cameraZ;
@@ -456,6 +483,7 @@ void WorldRenderer::render(float cameraX, float cameraY, float cameraZ,
         std::sort(opaqueList.begin(), opaqueList.end(), farToNear);
         std::sort(translucentList.begin(), translucentList.end(), farToNear);
         std::sort(overlayList.begin(), overlayList.end(), farToNear);
+        std::sort(effectList.begin(), effectList.end(), farToNear);
 
         ctx_->OMSetBlendState(blendOff_.Get(), nullptr, 0xFFFFFFFF);
         ctx_->OMSetDepthStencilState(depthOn_.Get(), 0);
@@ -470,6 +498,11 @@ void WorldRenderer::render(float cameraX, float cameraY, float cameraZ,
         }
         for (auto* mesh : overlayList) {
             drawBuffer(mesh->overlayBuffer.Get(), mesh->overlayVertexCount, mesh->overlayTexture, mesh->overlayTextureOverride, constants, textureEnabled);
+        }
+        ctx_->OMSetBlendState(blendAdditive_.Get(), nullptr, 0xFFFFFFFF);
+        ctx_->OMSetDepthStencilState(depthRead_.Get(), 0);
+        for (auto* mesh : effectList) {
+            drawBuffer(mesh->effectBuffer.Get(), mesh->effectVertexCount, mesh->effectTexture, mesh->effectTextureOverride, constants, textureEnabled);
         }
     } else {
         ctx_->OMSetBlendState(blendOff_.Get(), nullptr, 0xFFFFFFFF);

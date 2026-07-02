@@ -41,15 +41,19 @@ private:
         ComPtr<ID3D11Buffer> opaqueBuffer;
         ComPtr<ID3D11Buffer> translucentBuffer;
         ComPtr<ID3D11Buffer> overlayBuffer;
+        ComPtr<ID3D11Buffer> effectBuffer;
         ID3D11ShaderResourceView* opaqueTexture = nullptr;
         ID3D11ShaderResourceView* translucentTexture = nullptr;
         ID3D11ShaderResourceView* overlayTexture = nullptr;
+        ID3D11ShaderResourceView* effectTexture = nullptr;
         bool opaqueTextureOverride = false;
         bool translucentTextureOverride = false;
         bool overlayTextureOverride = false;
+        bool effectTextureOverride = false;
         int opaqueVertexCount = 0;
         int translucentVertexCount = 0;
         int overlayVertexCount = 0;
+        int effectVertexCount = 0;
         float centerX = 0.0f;
         float centerY = 0.0f;
         float centerZ = 0.0f;
@@ -70,6 +74,7 @@ private:
     ComPtr<ID3D11DepthStencilState> depthOff_;
     ComPtr<ID3D11BlendState> blendOff_;
     ComPtr<ID3D11BlendState> blendOn_;
+    ComPtr<ID3D11BlendState> blendAdditive_;
     ComPtr<ID3D11SamplerState> samplerPoint_;
     ComPtr<ID3D11SamplerState> samplerLinear_;
 

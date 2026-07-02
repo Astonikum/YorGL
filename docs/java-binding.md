@@ -51,4 +51,8 @@ The Java class mirrors the C API:
 - world mesh upload, section layer upload, optional per-layer texture override, texture binding, texture filter, sky color, render;
 - SDF font atlas, metrics, glyphs, kerning, text measurement, and text drawing.
 
+World section layers use shared numeric semantics across the C and JVM APIs:
+`0` opaque/cutout, `1` translucent, `2` translucent overlay, and `3` additive
+effect.
+
 The binding does not introduce game-specific concepts. Game engines translate their own world, UI, and asset data before calling YorGL.

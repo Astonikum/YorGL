@@ -70,8 +70,10 @@ World rendering is generic mesh rendering. YorGL does not know about Minecraft c
 `yorglWorldUploadSectionLayerTextured` uploads one section layer with a
 per-layer texture override. Use it for dynamic world layers such as text or
 markers that need a different atlas from the global world texture.
-Layer `0` is opaque/cutout, layer `1` is translucent, and layer `2` is a
-translucent overlay drawn after layer `1`.
+Layer `0` is opaque/cutout, layer `1` is translucent, layer `2` is a
+translucent overlay drawn after layer `1`, and layer `3` is an additive effect
+layer for emissive/glint/beam-style geometry. Layers `1`, `2`, and `3` read
+depth without writing it; layer `3` uses additive blending.
 
 ## Fonts
 
