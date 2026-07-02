@@ -96,6 +96,7 @@ public:
     virtual void worldSetTexture(std::int64_t) {}
     virtual void worldSetTextureFilter(TextureFilter) {}
     virtual void worldSetSkyColor(float, float, float) {}
+    virtual void worldSetFog(float, float, float, float, float) {}
     virtual void worldRender(float, float, float, float, float, float, float, float, int, int) {}
 
     virtual std::int64_t sdfFontCreate(const std::uint8_t*, int, float) { return 0; }

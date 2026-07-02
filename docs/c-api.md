@@ -65,6 +65,7 @@ World rendering is generic mesh rendering. YorGL does not know about Minecraft c
 - `yorglWorldSetTexture`
 - `yorglWorldSetTextureFilter`
 - `yorglWorldSetSkyColor`
+- `yorglWorldSetFog`
 - `yorglWorldRender`
 
 `yorglWorldUploadSectionLayerTextured` uploads one section layer with a
@@ -74,6 +75,9 @@ Layer `0` is opaque/cutout, layer `1` is translucent, layer `2` is a
 translucent overlay drawn after layer `1`, and layer `3` is an additive effect
 layer for emissive/glint/beam-style geometry. Layers `1`, `2`, and `3` read
 depth without writing it; layer `3` uses additive blending.
+`yorglWorldSetFog(renderer, r, g, b, start, end)` sets linear fog color and
+distance range for the world pixel shader. If it is not called, the DX11 backend
+uses the current sky color with a `farPlane * 0.72` to `farPlane` range.
 
 ## Fonts
 

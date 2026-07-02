@@ -48,11 +48,14 @@ The Java class mirrors the C API:
 - texture upload, region update, and release;
 - screen-space quads, gradients, scissor, blur, and SDF mode;
 - cubemap rendering through `cubemapRender`; `panoramaRender` remains as a compatibility alias;
-- world mesh upload, section layer upload, optional per-layer texture override, texture binding, texture filter, sky color, render;
+- world mesh upload, section layer upload, optional per-layer texture override, texture binding, texture filter, sky color, fog, render;
 - SDF font atlas, metrics, glyphs, kerning, text measurement, and text drawing.
 
 World section layers use shared numeric semantics across the C and JVM APIs:
 `0` opaque/cutout, `1` translucent, `2` translucent overlay, and `3` additive
 effect.
+`worldSetFog(r, g, b, start, end)` controls the linear world fog range. Clients
+that do not call it keep the backend default of sky-colored fog near the far
+plane.
 
 The binding does not introduce game-specific concepts. Game engines translate their own world, UI, and asset data before calling YorGL.

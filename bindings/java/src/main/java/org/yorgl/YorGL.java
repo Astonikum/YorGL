@@ -194,6 +194,10 @@ public final class YorGL implements AutoCloseable {
         YorGLNative.worldSetSkyColor(handle, r, g, b);
     }
 
+    public void worldSetFog(float r, float g, float b, float start, float end) {
+        YorGLNative.worldSetFog(handle, r, g, b, start, end);
+    }
+
     public void worldRender(float cameraX, float cameraY, float cameraZ, float dirX, float dirY, float dirZ, float fovYDegrees, float farPlane, int width, int height) {
         YorGLNative.worldRender(handle, cameraX, cameraY, cameraZ, dirX, dirY, dirZ, fovYDegrees, farPlane, width, height);
     }

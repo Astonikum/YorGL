@@ -232,6 +232,10 @@ void yorglWorldSetSkyColor(YorGLRenderer* renderer, float r, float g, float b) {
     if (auto* backend = ::backend(renderer)) backend->worldSetSkyColor(r, g, b);
 }
 
+void yorglWorldSetFog(YorGLRenderer* renderer, float r, float g, float b, float start, float end) {
+    if (auto* backend = ::backend(renderer)) backend->worldSetFog(r, g, b, start, end);
+}
+
 void yorglWorldRender(YorGLRenderer* renderer, float cameraX, float cameraY, float cameraZ, float dirX, float dirY, float dirZ, float fovYDegrees, float farPlane, int width, int height) {
     if (auto* backend = ::backend(renderer)) backend->worldRender(cameraX, cameraY, cameraZ, dirX, dirY, dirZ, fovYDegrees, farPlane, width, height);
 }

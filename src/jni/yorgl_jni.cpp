@@ -235,6 +235,10 @@ JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_worldSetSkyColor(JNIEnv*, jcla
     yorglWorldSetSkyColor(handle(ptr), r, g, b);
 }
 
+JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_worldSetFog(JNIEnv*, jclass, jlong ptr, jfloat r, jfloat g, jfloat b, jfloat start, jfloat end) {
+    yorglWorldSetFog(handle(ptr), r, g, b, start, end);
+}
+
 JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_worldRender(JNIEnv*, jclass, jlong ptr, jfloat cameraX, jfloat cameraY, jfloat cameraZ, jfloat dirX, jfloat dirY, jfloat dirZ, jfloat fovYDegrees, jfloat farPlane, jint width, jint height) {
     yorglWorldRender(handle(ptr), cameraX, cameraY, cameraZ, dirX, dirY, dirZ, fovYDegrees, farPlane, width, height);
 }

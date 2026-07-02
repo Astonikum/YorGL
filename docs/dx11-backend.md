@@ -18,6 +18,9 @@ The DirectX 11 backend lives in `src/backends/dx11`.
 - `modules/gui_renderer.*` draws screen-space colored, textured, gradient, SDF, scissored, and blurred rectangles.
 - `modules/world_renderer.*` draws generic 3D mesh sections with opaque, translucent, translucent overlay, and additive effect layers. Uploaded section layers are stored in default-usage D3D11 vertex buffers because chunk data is static between explicit uploads.
 - The world renderer supports nearest and linear atlas sampling; nearest remains the default for pixel-art atlases.
+- The world renderer supports linear distance fog with caller-provided color,
+  start, and end distances. If a client does not set fog, it falls back to
+  sky-colored fog near the current far plane.
 - The additive effect layer is intended for emissive, glint, beam, and similar
   render paths that should contribute light-colored pixels while still being
   depth-tested against world geometry.

@@ -91,6 +91,7 @@ YORGL_API void yorglWorldClearSections(YorGLRenderer* renderer);
 YORGL_API void yorglWorldSetTexture(YorGLRenderer* renderer, int64_t texture);
 YORGL_API void yorglWorldSetTextureFilter(YorGLRenderer* renderer, YorGLTextureFilter filter);
 YORGL_API void yorglWorldSetSkyColor(YorGLRenderer* renderer, float r, float g, float b);
+YORGL_API void yorglWorldSetFog(YorGLRenderer* renderer, float r, float g, float b, float start, float end);
 YORGL_API void yorglWorldRender(YorGLRenderer* renderer, float cameraX, float cameraY, float cameraZ, float dirX, float dirY, float dirZ, float fovYDegrees, float farPlane, int width, int height);
 
 YORGL_API int64_t yorglSdfFontCreate(YorGLRenderer* renderer, const uint8_t* ttfData, int byteCount, float fontSize);

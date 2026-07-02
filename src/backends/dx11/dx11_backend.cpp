@@ -269,6 +269,7 @@ void Dx11Backend::worldClearSections() { world_.clearSections(); }
 void Dx11Backend::worldSetTexture(std::int64_t texture) { world_.setTexture(reinterpret_cast<ID3D11ShaderResourceView*>(texture)); }
 void Dx11Backend::worldSetTextureFilter(TextureFilter filter) { world_.setTextureFilter(filter); }
 void Dx11Backend::worldSetSkyColor(float r, float g, float b) { world_.setSkyColor(r, g, b); }
+void Dx11Backend::worldSetFog(float r, float g, float b, float start, float end) { world_.setFog(r, g, b, start, end); }
 void Dx11Backend::worldRender(float cameraX, float cameraY, float cameraZ, float dirX, float dirY, float dirZ, float fovYDegrees, float farPlane, int width, int height) {
     gui_.flush();
     world_.render(cameraX, cameraY, cameraZ, dirX, dirY, dirZ, fovYDegrees, farPlane, width, height, rtv_.Get(), dsv_.Get());
