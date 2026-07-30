@@ -30,6 +30,7 @@ public:
     float getLineHeight() const { return lineHeight_; }
     float getAscent() const { return ascent_; }
     float getDescent() const { return descent_; }
+    float getFontSize() const { return fontSize_; }
 
 private:
     void bakeAtlas();

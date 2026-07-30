@@ -2,7 +2,10 @@
 #include "renderer.hpp"
 
 using yorgl::BackendKind;
+using yorgl::PresentMode;
 using yorgl::Renderer;
+using yorgl::SwapChainOptions;
+using yorgl::TextureFilter;
 
 struct YorGLRenderer {
     Renderer renderer;
@@ -19,6 +22,33 @@ static BackendKind toBackend(YorGLBackendKind backend) {
 static yorgl::Backend* backend(YorGLRenderer* renderer) {
     if (!renderer || !renderer->renderer.valid()) return nullptr;
     return &renderer->renderer.backend();
+}
+
+static PresentMode toPresentMode(YorGLPresentMode mode) {
+    switch (mode) {
+        case YORGL_PRESENT_IMMEDIATE: return PresentMode::Immediate;
+        case YORGL_PRESENT_VSYNC:
+        default: return PresentMode::VSync;
+    }
+}
+
+static TextureFilter toTextureFilter(YorGLTextureFilter filter) {
+    switch (filter) {
+        case YORGL_TEXTURE_FILTER_LINEAR: return TextureFilter::Linear;
+        case YORGL_TEXTURE_FILTER_NEAREST:
+        default: return TextureFilter::Nearest;
+    }
+}
+
+static SwapChainOptions toSwapChainOptions(const YorGLSwapChainOptions* source) {
+    SwapChainOptions options;
+    if (!source) return options;
+    options.width = source->width;
+    options.height = source->height;
+    options.bufferCount = source->bufferCount;
+    options.presentMode = toPresentMode(source->presentMode);
+    options.allowTearing = source->allowTearing != 0;
+    return options;
 }
 
 YorGLRenderer* yorglCreate(YorGLBackendKind backend) {
@@ -41,9 +71,39 @@ const char* yorglBackendName(YorGLRenderer* renderer) {
     return name.data();
 }
 
+int yorglGetCapabilities(YorGLRenderer* renderer, YorGLCapabilities* outCapabilities) {
+    auto* b = backend(renderer);
+    if (!b || !outCapabilities) return 0;
+    const auto caps = b->capabilities();
+    outCapabilities->backend = static_cast<int>(caps.backend);
+    outCapabilities->featureLevelMajor = caps.featureLevelMajor;
+    outCapabilities->featureLevelMinor = caps.featureLevelMinor;
+    outCapabilities->maxTextureSize = caps.maxTextureSize;
+    outCapabilities->presentVSync = caps.presentVSync ? 1 : 0;
+    outCapabilities->presentImmediate = caps.presentImmediate ? 1 : 0;
+    outCapabilities->presentTearing = caps.presentTearing ? 1 : 0;
+    return 1;
+}
+
+int yorglGetDiagnostics(YorGLRenderer* renderer, YorGLRenderDiagnostics* outDiagnostics) {
+    auto* b = backend(renderer);
+    if (!b || !outDiagnostics) return 0;
+    const auto diagnostics = b->diagnostics();
+    outDiagnostics->lastResizeResult = diagnostics.lastResizeResult;
+    outDiagnostics->lastPresentResult = diagnostics.lastPresentResult;
+    outDiagnostics->deviceRemovedReason = diagnostics.deviceRemovedReason;
+    return 1;
+}
+
 int yorglCreateSwapChain(YorGLRenderer* renderer, int64_t windowHandle, int width, int height) {
     auto* b = backend(renderer);
     return b ? b->createSwapChain(windowHandle, width, height) : 0;
+}
+
+int yorglCreateSwapChainWithOptions(YorGLRenderer* renderer, int64_t windowHandle, const YorGLSwapChainOptions* options) {
+    auto* b = backend(renderer);
+    if (!b || !options) return 0;
+    return b->createSwapChain(windowHandle, toSwapChainOptions(options));
 }
 
 void yorglResize(YorGLRenderer* renderer, int width, int height) {
@@ -66,6 +126,10 @@ void yorglClearDepth(YorGLRenderer* renderer, float depth) {
     if (auto* b = backend(renderer)) b->clearDepth(depth);
 }
 
+void yorglSetPresentMode(YorGLRenderer* renderer, YorGLPresentMode mode) {
+    if (auto* b = backend(renderer)) b->setPresentMode(toPresentMode(mode));
+}
+
 void yorglEndFrame(YorGLRenderer* renderer) {
     if (auto* b = backend(renderer)) b->endFrame();
 }
@@ -73,6 +137,11 @@ void yorglEndFrame(YorGLRenderer* renderer) {
 int64_t yorglCreateTexture(YorGLRenderer* renderer, int width, int height, const uint8_t* rgba, int byteCount) {
     auto* b = backend(renderer);
     return b ? b->createTexture(width, height, rgba, byteCount) : 0;
+}
+
+int yorglUpdateTextureRegion(YorGLRenderer* renderer, int64_t texture, int x, int y, int width, int height, const uint8_t* rgba, int byteCount) {
+    auto* b = backend(renderer);
+    return b && b->updateTextureRegion(texture, x, y, width, height, rgba, byteCount);
 }
 
 void yorglDestroyTexture(YorGLRenderer* renderer, int64_t texture) {
@@ -119,8 +188,12 @@ void yorglGuiEnd(YorGLRenderer* renderer) {
     if (auto* b = backend(renderer)) b->guiEnd();
 }
 
+void yorglCubemapRender(YorGLRenderer* renderer, const int64_t* faces6, float yawRadians, int width, int height) {
+    if (auto* b = backend(renderer)) b->cubemapRender(faces6, yawRadians, width, height);
+}
+
 void yorglPanoramaRender(YorGLRenderer* renderer, const int64_t* faces6, float angle, int width, int height) {
-    if (auto* b = backend(renderer)) b->panoramaRender(faces6, angle, width, height);
+    yorglCubemapRender(renderer, faces6, angle, width, height);
 }
 
 void yorglWorldUploadMesh(YorGLRenderer* renderer, const float* vertices, int floatCount) {
@@ -135,6 +208,10 @@ void yorglWorldUploadSectionLayer(YorGLRenderer* renderer, int64_t sectionId, in
     if (auto* b = backend(renderer)) b->worldUploadSectionLayer(sectionId, x, y, z, layer, vertices, floatCount);
 }
 
+void yorglWorldUploadSectionLayerTextured(YorGLRenderer* renderer, int64_t sectionId, int x, int y, int z, int layer, int64_t texture, const float* vertices, int floatCount) {
+    if (auto* b = backend(renderer)) b->worldUploadSectionLayerTextured(sectionId, x, y, z, layer, texture, vertices, floatCount);
+}
+
 void yorglWorldRemoveSection(YorGLRenderer* renderer, int64_t sectionId) {
     if (auto* b = backend(renderer)) b->worldRemoveSection(sectionId);
 }
@@ -147,8 +224,16 @@ void yorglWorldSetTexture(YorGLRenderer* renderer, int64_t texture) {
     if (auto* b = backend(renderer)) b->worldSetTexture(texture);
 }
 
+void yorglWorldSetTextureFilter(YorGLRenderer* renderer, YorGLTextureFilter filter) {
+    if (auto* b = backend(renderer)) b->worldSetTextureFilter(toTextureFilter(filter));
+}
+
 void yorglWorldSetSkyColor(YorGLRenderer* renderer, float r, float g, float b) {
     if (auto* backend = ::backend(renderer)) backend->worldSetSkyColor(r, g, b);
+}
+
+void yorglWorldSetFog(YorGLRenderer* renderer, float r, float g, float b, float start, float end) {
+    if (auto* backend = ::backend(renderer)) backend->worldSetFog(r, g, b, start, end);
 }
 
 void yorglWorldRender(YorGLRenderer* renderer, float cameraX, float cameraY, float cameraZ, float dirX, float dirY, float dirZ, float fovYDegrees, float farPlane, int width, int height) {
@@ -182,4 +267,18 @@ int yorglSdfFontGlyph(YorGLRenderer* renderer, int64_t font, int codepoint, floa
 float yorglSdfFontKerning(YorGLRenderer* renderer, int64_t font, int leftCodepoint, int rightCodepoint) {
     auto* b = backend(renderer);
     return b ? b->sdfFontKerning(font, leftCodepoint, rightCodepoint) : 0.0f;
+}
+
+float yorglSdfFontTextWidth(YorGLRenderer* renderer, int64_t font, const char* utf8, int byteCount, float scale) {
+    auto* b = backend(renderer);
+    return b ? b->sdfFontTextWidth(font, utf8, byteCount, scale) : 0.0f;
+}
+
+float yorglSdfFontLineHeight(YorGLRenderer* renderer, int64_t font, float scale) {
+    auto* b = backend(renderer);
+    return b ? b->sdfFontLineHeight(font, scale) : 0.0f;
+}
+
+void yorglSdfFontDrawText(YorGLRenderer* renderer, int64_t font, const char* utf8, int byteCount, float x, float y, float scale, float r, float g, float b, float a, float weight, int shadow) {
+    if (auto* native = backend(renderer)) native->sdfFontDrawText(font, utf8, byteCount, x, y, scale, r, g, b, a, weight, shadow != 0);
 }

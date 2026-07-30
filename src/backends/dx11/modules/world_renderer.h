@@ -3,6 +3,7 @@
 #include <d3d11.h>
 #include <wrl/client.h>
 #include <unordered_map>
+#include "../../../yorgl/backend.hpp"
 
 using Microsoft::WRL::ComPtr;
 
@@ -13,10 +14,13 @@ public:
     void uploadMesh(const float* data, int floatCount);
     void uploadSection(long long sectionId, int sectionX, int sectionY, int sectionZ, const float* data, int floatCount);
     void uploadSectionLayer(long long sectionId, int sectionX, int sectionY, int sectionZ, int layer, const float* data, int floatCount);
+    void uploadSectionLayerTextured(long long sectionId, int sectionX, int sectionY, int sectionZ, int layer, ID3D11ShaderResourceView* texture, const float* data, int floatCount);
     void removeSection(long long sectionId);
     void clearSections();
     void setTexture(ID3D11ShaderResourceView* texture);
+    void setTextureFilter(yorgl::TextureFilter filter);
     void setSkyColor(float r, float g, float b);
+    void setFog(float r, float g, float b, float start, float end);
     void render(float cameraX, float cameraY, float cameraZ,
                 float dirX, float dirY, float dirZ, float fovYDegrees, float farPlane, int screenW, int screenH,
                 ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* dsv);
@@ -25,13 +29,32 @@ private:
     void createShaders();
     void ensureVertexCapacity(int vertexCount);
     void createStates();
-    void drawBuffer(ID3D11Buffer* buffer, int vertexCount);
+    struct CameraConstants {
+        float mvp[16];
+        float useTexture;
+        float cameraPos[3];
+        float skyColor[4];
+        float fogParams[4];
+    };
+    void drawBuffer(ID3D11Buffer* buffer, int vertexCount, ID3D11ShaderResourceView* texture, bool textureOverride, CameraConstants& constants, bool& textureEnabled);
 
     struct SectionMesh {
         ComPtr<ID3D11Buffer> opaqueBuffer;
         ComPtr<ID3D11Buffer> translucentBuffer;
+        ComPtr<ID3D11Buffer> overlayBuffer;
+        ComPtr<ID3D11Buffer> effectBuffer;
+        ID3D11ShaderResourceView* opaqueTexture = nullptr;
+        ID3D11ShaderResourceView* translucentTexture = nullptr;
+        ID3D11ShaderResourceView* overlayTexture = nullptr;
+        ID3D11ShaderResourceView* effectTexture = nullptr;
+        bool opaqueTextureOverride = false;
+        bool translucentTextureOverride = false;
+        bool overlayTextureOverride = false;
+        bool effectTextureOverride = false;
         int opaqueVertexCount = 0;
         int translucentVertexCount = 0;
+        int overlayVertexCount = 0;
+        int effectVertexCount = 0;
         float centerX = 0.0f;
         float centerY = 0.0f;
         float centerZ = 0.0f;
@@ -52,12 +75,19 @@ private:
     ComPtr<ID3D11DepthStencilState> depthOff_;
     ComPtr<ID3D11BlendState> blendOff_;
     ComPtr<ID3D11BlendState> blendOn_;
-    ComPtr<ID3D11SamplerState> sampler_;
+    ComPtr<ID3D11BlendState> blendAdditive_;
+    ComPtr<ID3D11SamplerState> samplerPoint_;
+    ComPtr<ID3D11SamplerState> samplerLinear_;
 
     int vertexCapacity_ = 0;
     int vertexCount_ = 0;
     std::unordered_map<long long, SectionMesh> sections_;
     float skyColor_[4] = {0.10f, 0.13f, 0.16f, 1.0f};
+    float fogColor_[4] = {0.10f, 0.13f, 0.16f, 1.0f};
+    float fogStart_ = -1.0f;
+    float fogEnd_ = -1.0f;
+    bool fogConfigured_ = false;
     ID3D11ShaderResourceView* texture_ = nullptr;
+    yorgl::TextureFilter textureFilter_ = yorgl::TextureFilter::Nearest;
     bool initialized_ = false;
 };

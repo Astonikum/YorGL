@@ -4,7 +4,7 @@
 
 #if defined(_WIN32)
 #include <d3d11.h>
-#include <dxgi1_2.h>
+#include <dxgi1_5.h>
 #include <wrl/client.h>
 #include "modules/cubemap_renderer.h"
 #include "modules/gui_renderer.h"
@@ -20,15 +20,19 @@ public:
     std::string_view name() const override { return "dx11"; }
     bool init() override;
     void shutdown() override;
-    bool createSwapChain(std::int64_t windowHandle, int width, int height) override;
+    bool createSwapChain(std::int64_t windowHandle, const SwapChainOptions& options) override;
     void resize(int width, int height) override;
     void beginFrame() override;
     void setViewport(float x, float y, float width, float height) override;
     void clearColor(float r, float g, float b, float a) override;
     void clearDepth(float depth) override;
+    BackendCapabilities capabilities() const override;
+    RenderDiagnostics diagnostics() const override;
+    void setPresentMode(PresentMode mode) override;
     void endFrame() override;
 
     std::int64_t createTexture(int width, int height, const std::uint8_t* rgba, int byteCount) override;
+    bool updateTextureRegion(std::int64_t texture, int x, int y, int width, int height, const std::uint8_t* rgba, int byteCount) override;
     void destroyTexture(std::int64_t texture) override;
 
     void guiBegin(int width, int height) override;
@@ -42,15 +46,18 @@ public:
     void guiBlurRect(float x, float y, float w, float h, int passes) override;
     void guiEnd() override;
 
-    void panoramaRender(const std::int64_t* faces, float angle, int width, int height) override;
+    void cubemapRender(const std::int64_t* faces, float yawRadians, int width, int height) override;
 
     void worldUploadMesh(const float* vertices, int floatCount) override;
     void worldUploadSection(std::int64_t sectionId, int x, int y, int z, const float* vertices, int floatCount) override;
     void worldUploadSectionLayer(std::int64_t sectionId, int x, int y, int z, int layer, const float* vertices, int floatCount) override;
+    void worldUploadSectionLayerTextured(std::int64_t sectionId, int x, int y, int z, int layer, std::int64_t texture, const float* vertices, int floatCount) override;
     void worldRemoveSection(std::int64_t sectionId) override;
     void worldClearSections() override;
     void worldSetTexture(std::int64_t texture) override;
+    void worldSetTextureFilter(TextureFilter filter) override;
     void worldSetSkyColor(float r, float g, float b) override;
+    void worldSetFog(float r, float g, float b, float start, float end) override;
     void worldRender(float cameraX, float cameraY, float cameraZ, float dirX, float dirY, float dirZ, float fovYDegrees, float farPlane, int width, int height) override;
 
     std::int64_t sdfFontCreate(const std::uint8_t* ttfData, int byteCount, float fontSize) override;
@@ -59,8 +66,12 @@ public:
     bool sdfFontMetrics(std::int64_t font, float* out3) override;
     bool sdfFontGlyph(std::int64_t font, int codepoint, float* out9) override;
     float sdfFontKerning(std::int64_t font, int leftCodepoint, int rightCodepoint) override;
+    float sdfFontTextWidth(std::int64_t font, const char* utf8, int byteCount, float scale) override;
+    float sdfFontLineHeight(std::int64_t font, float scale) override;
+    void sdfFontDrawText(std::int64_t font, const char* utf8, int byteCount, float x, float y, float scale, float r, float g, float b, float a, float weight, bool shadow) override;
 
 private:
+    void updateTearingSupport();
     void createRenderTarget();
 
     Microsoft::WRL::ComPtr<ID3D11Device> device_;
@@ -70,10 +81,18 @@ private:
     Microsoft::WRL::ComPtr<ID3D11DepthStencilView> dsv_;
     Microsoft::WRL::ComPtr<ID3D11Texture2D> depthBuffer_;
     GuiRenderer gui_;
-    CubemapRenderer panorama_;
+    CubemapRenderer cubemap_;
     WorldRenderer world_;
     int width_ = 0;
     int height_ = 0;
+    D3D_FEATURE_LEVEL featureLevel_ = D3D_FEATURE_LEVEL_11_0;
+    SwapChainOptions swapChainOptions_;
+    PresentMode presentMode_ = PresentMode::VSync;
+    bool allowTearing_ = false;
+    UINT swapChainFlags_ = 0;
+    HRESULT lastResizeResult_ = S_OK;
+    HRESULT lastPresentResult_ = S_OK;
+    HRESULT deviceRemovedReason_ = S_OK;
 };
 
 } // namespace yorgl

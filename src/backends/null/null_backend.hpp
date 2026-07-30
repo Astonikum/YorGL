@@ -9,18 +9,21 @@ public:
     std::string_view name() const override { return "null"; }
     bool init() override { return true; }
     void shutdown() override {}
-    bool createSwapChain(std::int64_t, int width, int height) override;
+    bool createSwapChain(std::int64_t, const SwapChainOptions& options) override;
     void resize(int width, int height) override;
     void beginFrame() override {}
     void setViewport(float, float, float, float) override {}
     void clearColor(float r, float g, float b, float a) override;
     void clearDepth(float) override {}
+    BackendCapabilities capabilities() const override;
+    void setPresentMode(PresentMode mode) override { presentMode_ = mode; }
     void endFrame() override {}
 
 private:
     int width_ = 0;
     int height_ = 0;
     float clear_[4] = {0.0f, 0.0f, 0.0f, 1.0f};
+    PresentMode presentMode_ = PresentMode::VSync;
 };
 
 } // namespace yorgl

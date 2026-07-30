@@ -23,8 +23,48 @@ JNIEXPORT jstring JNICALL Java_org_yorgl_YorGLNative_backendName(JNIEnv* env, jc
     return env->NewStringUTF(yorglBackendName(handle(ptr)));
 }
 
+JNIEXPORT jintArray JNICALL Java_org_yorgl_YorGLNative_capabilities(JNIEnv* env, jclass, jlong ptr) {
+    YorGLCapabilities caps{};
+    yorglGetCapabilities(handle(ptr), &caps);
+    jint values[7] = {
+        caps.backend,
+        caps.featureLevelMajor,
+        caps.featureLevelMinor,
+        caps.maxTextureSize,
+        caps.presentVSync,
+        caps.presentImmediate,
+        caps.presentTearing,
+    };
+    jintArray result = env->NewIntArray(7);
+    env->SetIntArrayRegion(result, 0, 7, values);
+    return result;
+}
+
+JNIEXPORT jintArray JNICALL Java_org_yorgl_YorGLNative_diagnostics(JNIEnv* env, jclass, jlong ptr) {
+    YorGLRenderDiagnostics diagnostics{};
+    yorglGetDiagnostics(handle(ptr), &diagnostics);
+    jint values[3] = {
+        diagnostics.lastResizeResult,
+        diagnostics.lastPresentResult,
+        diagnostics.deviceRemovedReason,
+    };
+    jintArray result = env->NewIntArray(3);
+    env->SetIntArrayRegion(result, 0, 3, values);
+    return result;
+}
+
 JNIEXPORT jboolean JNICALL Java_org_yorgl_YorGLNative_createSwapChain(JNIEnv*, jclass, jlong ptr, jlong hwnd, jint width, jint height) {
     return yorglCreateSwapChain(handle(ptr), hwnd, width, height) != 0;
+}
+
+JNIEXPORT jboolean JNICALL Java_org_yorgl_YorGLNative_createSwapChainWithOptions(JNIEnv*, jclass, jlong ptr, jlong hwnd, jint width, jint height, jint bufferCount, jint presentMode, jboolean allowTearing) {
+    YorGLSwapChainOptions options{};
+    options.width = width;
+    options.height = height;
+    options.bufferCount = bufferCount;
+    options.presentMode = static_cast<YorGLPresentMode>(presentMode);
+    options.allowTearing = allowTearing ? 1 : 0;
+    return yorglCreateSwapChainWithOptions(handle(ptr), hwnd, &options) != 0;
 }
 
 JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_resize(JNIEnv*, jclass, jlong ptr, jint width, jint height) {
@@ -47,6 +87,10 @@ JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_clearDepth(JNIEnv*, jclass, jl
     yorglClearDepth(handle(ptr), depth);
 }
 
+JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_setPresentMode(JNIEnv*, jclass, jlong ptr, jint mode) {
+    yorglSetPresentMode(handle(ptr), static_cast<YorGLPresentMode>(mode));
+}
+
 JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_endFrame(JNIEnv*, jclass, jlong ptr) {
     yorglEndFrame(handle(ptr));
 }
@@ -56,6 +100,15 @@ JNIEXPORT jlong JNICALL Java_org_yorgl_YorGLNative_createTexture(JNIEnv* env, jc
     jbyte* data = env->GetByteArrayElements(pixels, nullptr);
     jint len = env->GetArrayLength(pixels);
     jlong result = yorglCreateTexture(handle(ptr), width, height, reinterpret_cast<const uint8_t*>(data), len);
+    env->ReleaseByteArrayElements(pixels, data, JNI_ABORT);
+    return result;
+}
+
+JNIEXPORT jboolean JNICALL Java_org_yorgl_YorGLNative_updateTextureRegion(JNIEnv* env, jclass, jlong ptr, jlong texture, jint x, jint y, jint width, jint height, jbyteArray pixels) {
+    if (!pixels) return false;
+    jbyte* data = env->GetByteArrayElements(pixels, nullptr);
+    jint len = env->GetArrayLength(pixels);
+    const bool result = yorglUpdateTextureRegion(handle(ptr), texture, x, y, width, height, reinterpret_cast<const uint8_t*>(data), len) != 0;
     env->ReleaseByteArrayElements(pixels, data, JNI_ABORT);
     return result;
 }
@@ -107,11 +160,15 @@ JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_guiEnd(JNIEnv*, jclass, jlong 
     yorglGuiEnd(handle(ptr));
 }
 
-JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_panoramaRender(JNIEnv* env, jclass, jlong ptr, jlongArray faces, jfloat angle, jint width, jint height) {
+JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_cubemapRender(JNIEnv* env, jclass, jlong ptr, jlongArray faces, jfloat yawRadians, jint width, jint height) {
     if (!faces || env->GetArrayLength(faces) < 6) return;
     jlong* values = env->GetLongArrayElements(faces, nullptr);
-    yorglPanoramaRender(handle(ptr), reinterpret_cast<const int64_t*>(values), angle, width, height);
+    yorglCubemapRender(handle(ptr), reinterpret_cast<const int64_t*>(values), yawRadians, width, height);
     env->ReleaseLongArrayElements(faces, values, JNI_ABORT);
+}
+
+JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_panoramaRender(JNIEnv* env, jclass cls, jlong ptr, jlongArray faces, jfloat angle, jint width, jint height) {
+    Java_org_yorgl_YorGLNative_cubemapRender(env, cls, ptr, faces, angle, width, height);
 }
 
 JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_worldUploadMesh(JNIEnv* env, jclass, jlong ptr, jfloatArray vertices, jint floatCount) {
@@ -147,6 +204,17 @@ JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_worldUploadSectionLayer(JNIEnv
     env->ReleaseFloatArrayElements(vertices, data, JNI_ABORT);
 }
 
+JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_worldUploadSectionLayerTextured(JNIEnv* env, jclass, jlong ptr, jlong sectionId, jint x, jint y, jint z, jint layer, jlong texture, jfloatArray vertices, jint floatCount) {
+    if (!vertices || floatCount <= 0) {
+        yorglWorldUploadSectionLayerTextured(handle(ptr), sectionId, x, y, z, layer, texture, nullptr, 0);
+        return;
+    }
+    jfloat* data = env->GetFloatArrayElements(vertices, nullptr);
+    jint len = env->GetArrayLength(vertices);
+    yorglWorldUploadSectionLayerTextured(handle(ptr), sectionId, x, y, z, layer, texture, data, floatCount < len ? floatCount : len);
+    env->ReleaseFloatArrayElements(vertices, data, JNI_ABORT);
+}
+
 JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_worldRemoveSection(JNIEnv*, jclass, jlong ptr, jlong sectionId) {
     yorglWorldRemoveSection(handle(ptr), sectionId);
 }
@@ -159,8 +227,16 @@ JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_worldSetTexture(JNIEnv*, jclas
     yorglWorldSetTexture(handle(ptr), texture);
 }
 
+JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_worldSetTextureFilter(JNIEnv*, jclass, jlong ptr, jint filter) {
+    yorglWorldSetTextureFilter(handle(ptr), static_cast<YorGLTextureFilter>(filter));
+}
+
 JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_worldSetSkyColor(JNIEnv*, jclass, jlong ptr, jfloat r, jfloat g, jfloat b) {
     yorglWorldSetSkyColor(handle(ptr), r, g, b);
+}
+
+JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_worldSetFog(JNIEnv*, jclass, jlong ptr, jfloat r, jfloat g, jfloat b, jfloat start, jfloat end) {
+    yorglWorldSetFog(handle(ptr), r, g, b, start, end);
 }
 
 JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_worldRender(JNIEnv*, jclass, jlong ptr, jfloat cameraX, jfloat cameraY, jfloat cameraZ, jfloat dirX, jfloat dirY, jfloat dirZ, jfloat fovYDegrees, jfloat farPlane, jint width, jint height) {
@@ -202,6 +278,27 @@ JNIEXPORT jfloatArray JNICALL Java_org_yorgl_YorGLNative_sdfFontGlyph(JNIEnv* en
 
 JNIEXPORT jfloat JNICALL Java_org_yorgl_YorGLNative_sdfFontKerning(JNIEnv*, jclass, jlong ptr, jlong font, jint leftCodepoint, jint rightCodepoint) {
     return yorglSdfFontKerning(handle(ptr), font, leftCodepoint, rightCodepoint);
+}
+
+JNIEXPORT jfloat JNICALL Java_org_yorgl_YorGLNative_sdfFontTextWidth(JNIEnv* env, jclass, jlong ptr, jlong font, jstring text, jfloat scale) {
+    if (!text) return 0.0f;
+    const char* utf8 = env->GetStringUTFChars(text, nullptr);
+    jsize len = env->GetStringUTFLength(text);
+    jfloat result = yorglSdfFontTextWidth(handle(ptr), font, utf8, len, scale);
+    env->ReleaseStringUTFChars(text, utf8);
+    return result;
+}
+
+JNIEXPORT jfloat JNICALL Java_org_yorgl_YorGLNative_sdfFontLineHeight(JNIEnv*, jclass, jlong ptr, jlong font, jfloat scale) {
+    return yorglSdfFontLineHeight(handle(ptr), font, scale);
+}
+
+JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_sdfFontDrawText(JNIEnv* env, jclass, jlong ptr, jlong font, jstring text, jfloat x, jfloat y, jfloat scale, jfloat r, jfloat g, jfloat b, jfloat a, jfloat weight, jboolean shadow) {
+    if (!text) return;
+    const char* utf8 = env->GetStringUTFChars(text, nullptr);
+    jsize len = env->GetStringUTFLength(text);
+    yorglSdfFontDrawText(handle(ptr), font, utf8, len, x, y, scale, r, g, b, a, weight, shadow);
+    env->ReleaseStringUTFChars(text, utf8);
 }
 
 }

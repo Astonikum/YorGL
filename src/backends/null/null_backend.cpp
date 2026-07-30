@@ -7,9 +7,10 @@
 
 namespace yorgl {
 
-bool NullBackend::createSwapChain(std::int64_t, int width, int height) {
-    width_ = width;
-    height_ = height;
+bool NullBackend::createSwapChain(std::int64_t, const SwapChainOptions& options) {
+    width_ = options.width;
+    height_ = options.height;
+    presentMode_ = options.presentMode;
     return width_ > 0 && height_ > 0;
 }
 
@@ -23,6 +24,14 @@ void NullBackend::clearColor(float r, float g, float b, float a) {
     clear_[1] = g;
     clear_[2] = b;
     clear_[3] = a;
+}
+
+BackendCapabilities NullBackend::capabilities() const {
+    BackendCapabilities caps;
+    caps.backend = BackendKind::Null;
+    caps.presentVSync = true;
+    caps.presentImmediate = true;
+    return caps;
 }
 
 std::unique_ptr<Backend> createBackend(BackendKind kind) {

@@ -71,14 +71,6 @@ struct WorldVertex {
     float u, v;
 };
 
-struct CameraConstants {
-    float mvp[16];
-    float useTexture;
-    float cameraPos[3];
-    float skyColor[4];
-    float fogParams[4];
-};
-
 struct Vec3 {
     float x, y, z;
 };
@@ -156,7 +148,7 @@ void WorldRenderer::shutdown() {
     vs_.Reset(); ps_.Reset(); inputLayout_.Reset();
     vertexBuffer_.Reset(); constantBuffer_.Reset(); rasterState_.Reset();
     depthOn_.Reset(); depthRead_.Reset();
-    depthOff_.Reset(); blendOff_.Reset(); blendOn_.Reset(); sampler_.Reset();
+    depthOff_.Reset(); blendOff_.Reset(); blendOn_.Reset(); blendAdditive_.Reset(); samplerPoint_.Reset(); samplerLinear_.Reset();
     vertexCapacity_ = 0;
     vertexCount_ = 0;
     sections_.clear();
@@ -252,6 +244,17 @@ void WorldRenderer::createStates() {
     bdAlpha.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
     device_->CreateBlendState(&bdAlpha, &blendOn_);
 
+    D3D11_BLEND_DESC bdAdd = {};
+    bdAdd.RenderTarget[0].BlendEnable = TRUE;
+    bdAdd.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+    bdAdd.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+    bdAdd.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+    bdAdd.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+    bdAdd.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
+    bdAdd.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+    bdAdd.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+    device_->CreateBlendState(&bdAdd, &blendAdditive_);
+
     D3D11_SAMPLER_DESC sd = {};
     sd.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
     sd.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
@@ -260,7 +263,9 @@ void WorldRenderer::createStates() {
     sd.ComparisonFunc = D3D11_COMPARISON_NEVER;
     sd.MinLOD = 0;
     sd.MaxLOD = D3D11_FLOAT32_MAX;
-    device_->CreateSamplerState(&sd, &sampler_);
+    device_->CreateSamplerState(&sd, &samplerPoint_);
+    sd.Filter = D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
+    device_->CreateSamplerState(&sd, &samplerLinear_);
 }
 
 void WorldRenderer::uploadMesh(const float* data, int floatCount) {
@@ -288,45 +293,76 @@ void WorldRenderer::uploadSection(long long sectionId, int sectionX, int section
 }
 
 void WorldRenderer::uploadSectionLayer(long long sectionId, int sectionX, int sectionY, int sectionZ, int layer, const float* data, int floatCount) {
+    uploadSectionLayerTextured(sectionId, sectionX, sectionY, sectionZ, layer, nullptr, data, floatCount);
+}
+
+void WorldRenderer::uploadSectionLayerTextured(long long sectionId, int sectionX, int sectionY, int sectionZ, int layer, ID3D11ShaderResourceView* texture, const float* data, int floatCount) {
     if (!initialized_ || !data || floatCount <= 0) {
         auto found = sections_.find(sectionId);
         if (found != sections_.end()) {
-            if (layer == 1) {
+            if (layer == 3) {
+                found->second.effectBuffer.Reset();
+                found->second.effectVertexCount = 0;
+                found->second.effectTexture = nullptr;
+                found->second.effectTextureOverride = false;
+            } else if (layer == 2) {
+                found->second.overlayBuffer.Reset();
+                found->second.overlayVertexCount = 0;
+                found->second.overlayTexture = nullptr;
+                found->second.overlayTextureOverride = false;
+            } else if (layer == 1) {
                 found->second.translucentBuffer.Reset();
                 found->second.translucentVertexCount = 0;
+                found->second.translucentTexture = nullptr;
+                found->second.translucentTextureOverride = false;
             } else {
                 found->second.opaqueBuffer.Reset();
                 found->second.opaqueVertexCount = 0;
+                found->second.opaqueTexture = nullptr;
+                found->second.opaqueTextureOverride = false;
             }
-            if (found->second.opaqueVertexCount <= 0 && found->second.translucentVertexCount <= 0) sections_.erase(found);
+            if (found->second.opaqueVertexCount <= 0 &&
+                found->second.translucentVertexCount <= 0 &&
+                found->second.overlayVertexCount <= 0 &&
+                found->second.effectVertexCount <= 0) sections_.erase(found);
         }
         return;
     }
     int vertexCount = floatCount / 9;
     D3D11_BUFFER_DESC bd = {};
     bd.ByteWidth = sizeof(WorldVertex) * vertexCount;
-    bd.Usage = D3D11_USAGE_DYNAMIC;
+    bd.Usage = D3D11_USAGE_DEFAULT;
     bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
+    D3D11_SUBRESOURCE_DATA initialData = {};
+    initialData.pSysMem = data;
     ComPtr<ID3D11Buffer> buffer;
-    if (FAILED(device_->CreateBuffer(&bd, nullptr, &buffer))) return;
-
-    D3D11_MAPPED_SUBRESOURCE mapped;
-    if (FAILED(ctx_->Map(buffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped))) return;
-    memcpy(mapped.pData, data, vertexCount * sizeof(WorldVertex));
-    ctx_->Unmap(buffer.Get(), 0);
+    if (FAILED(device_->CreateBuffer(&bd, &initialData, &buffer))) return;
 
     SectionMesh mesh = sections_[sectionId];
     mesh.centerX = sectionX * 16.0f + 8.0f;
     mesh.centerY = sectionY * 16.0f + 8.0f;
     mesh.centerZ = sectionZ * 16.0f + 8.0f;
-    if (layer == 1) {
+    if (layer == 3) {
+        mesh.effectBuffer = buffer;
+        mesh.effectVertexCount = vertexCount;
+        mesh.effectTexture = texture;
+        mesh.effectTextureOverride = texture != nullptr;
+    } else if (layer == 2) {
+        mesh.overlayBuffer = buffer;
+        mesh.overlayVertexCount = vertexCount;
+        mesh.overlayTexture = texture;
+        mesh.overlayTextureOverride = texture != nullptr;
+    } else if (layer == 1) {
         mesh.translucentBuffer = buffer;
         mesh.translucentVertexCount = vertexCount;
+        mesh.translucentTexture = texture;
+        mesh.translucentTextureOverride = texture != nullptr;
     } else {
         mesh.opaqueBuffer = buffer;
         mesh.opaqueVertexCount = vertexCount;
+        mesh.opaqueTexture = texture;
+        mesh.opaqueTextureOverride = texture != nullptr;
     }
     sections_[sectionId] = mesh;
     vertexCount_ = 0;
@@ -345,11 +381,31 @@ void WorldRenderer::setTexture(ID3D11ShaderResourceView* texture) {
     texture_ = texture;
 }
 
+void WorldRenderer::setTextureFilter(yorgl::TextureFilter filter) {
+    textureFilter_ = filter;
+}
+
 void WorldRenderer::setSkyColor(float r, float g, float b) {
     skyColor_[0] = r;
     skyColor_[1] = g;
     skyColor_[2] = b;
     skyColor_[3] = 1.0f;
+    if (!fogConfigured_) {
+        fogColor_[0] = r;
+        fogColor_[1] = g;
+        fogColor_[2] = b;
+        fogColor_[3] = 1.0f;
+    }
+}
+
+void WorldRenderer::setFog(float r, float g, float b, float start, float end) {
+    fogConfigured_ = true;
+    fogColor_[0] = r;
+    fogColor_[1] = g;
+    fogColor_[2] = b;
+    fogColor_[3] = 1.0f;
+    fogStart_ = start;
+    fogEnd_ = end;
 }
 
 void WorldRenderer::render(float cameraX, float cameraY, float cameraZ,
@@ -376,12 +432,14 @@ void WorldRenderer::render(float cameraX, float cameraY, float cameraZ,
     constants.cameraPos[0] = cameraX;
     constants.cameraPos[1] = cameraY;
     constants.cameraPos[2] = cameraZ;
-    constants.skyColor[0] = skyColor_[0];
-    constants.skyColor[1] = skyColor_[1];
-    constants.skyColor[2] = skyColor_[2];
+    const float fogStart = fogStart_ >= 0.0f ? fogStart_ : farPlane * 0.72f;
+    const float fogEnd = fogEnd_ > fogStart ? fogEnd_ : farPlane;
+    constants.skyColor[0] = fogColor_[0];
+    constants.skyColor[1] = fogColor_[1];
+    constants.skyColor[2] = fogColor_[2];
     constants.skyColor[3] = 1.0f;
-    constants.fogParams[0] = farPlane * 0.72f;
-    constants.fogParams[1] = farPlane;
+    constants.fogParams[0] = fogStart;
+    constants.fogParams[1] = fogEnd;
     constants.fogParams[2] = constants.fogParams[3] = 0.0f;
     D3D11_MAPPED_SUBRESOURCE mapped;
     if (SUCCEEDED(ctx_->Map(constantBuffer_.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped))) {
@@ -400,13 +458,19 @@ void WorldRenderer::render(float cameraX, float cameraY, float cameraZ,
     ctx_->VSSetConstantBuffers(0, 1, constantBuffer_.GetAddressOf());
     ctx_->PSSetShader(ps_.Get(), nullptr, 0);
     ctx_->PSSetConstantBuffers(0, 1, constantBuffer_.GetAddressOf());
-    ctx_->PSSetSamplers(0, 1, sampler_.GetAddressOf());
+    auto& sampler = textureFilter_ == yorgl::TextureFilter::Linear ? samplerLinear_ : samplerPoint_;
+    ctx_->PSSetSamplers(0, 1, sampler.GetAddressOf());
     ctx_->PSSetShaderResources(0, 1, &texture_);
+    bool textureEnabled = constants.useTexture > 0.5f;
     if (!sections_.empty()) {
         std::vector<SectionMesh*> opaqueList;
         std::vector<SectionMesh*> translucentList;
+        std::vector<SectionMesh*> overlayList;
+        std::vector<SectionMesh*> effectList;
         opaqueList.reserve(sections_.size());
         translucentList.reserve(sections_.size());
+        overlayList.reserve(sections_.size());
+        effectList.reserve(sections_.size());
         Vec3 renderDir = normalize({dirX, 0.0f, dirZ});
         float maxDist = farPlane + 32.0f;
         float maxDistSq = maxDist * maxDist;
@@ -426,6 +490,8 @@ void WorldRenderer::render(float cameraX, float cameraY, float cameraZ,
             }
             if (mesh.opaqueVertexCount > 0) opaqueList.push_back(&mesh);
             if (mesh.translucentVertexCount > 0) translucentList.push_back(&mesh);
+            if (mesh.overlayVertexCount > 0) overlayList.push_back(&mesh);
+            if (mesh.effectVertexCount > 0) effectList.push_back(&mesh);
         }
         auto farToNear = [cameraX, cameraY, cameraZ](const SectionMesh* a, const SectionMesh* b) {
             float ax = a->centerX - cameraX, ay = a->centerY - cameraY, az = a->centerZ - cameraZ;
@@ -434,29 +500,51 @@ void WorldRenderer::render(float cameraX, float cameraY, float cameraZ,
         };
         std::sort(opaqueList.begin(), opaqueList.end(), farToNear);
         std::sort(translucentList.begin(), translucentList.end(), farToNear);
+        std::sort(overlayList.begin(), overlayList.end(), farToNear);
+        std::sort(effectList.begin(), effectList.end(), farToNear);
 
         ctx_->OMSetBlendState(blendOff_.Get(), nullptr, 0xFFFFFFFF);
         ctx_->OMSetDepthStencilState(depthOn_.Get(), 0);
         for (auto* mesh : opaqueList) {
-            drawBuffer(mesh->opaqueBuffer.Get(), mesh->opaqueVertexCount);
+            drawBuffer(mesh->opaqueBuffer.Get(), mesh->opaqueVertexCount, mesh->opaqueTexture, mesh->opaqueTextureOverride, constants, textureEnabled);
         }
 
         ctx_->OMSetBlendState(blendOn_.Get(), nullptr, 0xFFFFFFFF);
         ctx_->OMSetDepthStencilState(depthRead_.Get(), 0);
         for (auto* mesh : translucentList) {
-            drawBuffer(mesh->translucentBuffer.Get(), mesh->translucentVertexCount);
+            drawBuffer(mesh->translucentBuffer.Get(), mesh->translucentVertexCount, mesh->translucentTexture, mesh->translucentTextureOverride, constants, textureEnabled);
+        }
+        for (auto* mesh : overlayList) {
+            drawBuffer(mesh->overlayBuffer.Get(), mesh->overlayVertexCount, mesh->overlayTexture, mesh->overlayTextureOverride, constants, textureEnabled);
+        }
+        ctx_->OMSetBlendState(blendAdditive_.Get(), nullptr, 0xFFFFFFFF);
+        ctx_->OMSetDepthStencilState(depthRead_.Get(), 0);
+        for (auto* mesh : effectList) {
+            drawBuffer(mesh->effectBuffer.Get(), mesh->effectVertexCount, mesh->effectTexture, mesh->effectTextureOverride, constants, textureEnabled);
         }
     } else {
         ctx_->OMSetBlendState(blendOff_.Get(), nullptr, 0xFFFFFFFF);
         ctx_->OMSetDepthStencilState(depthOn_.Get(), 0);
-        drawBuffer(vertexBuffer_.Get(), vertexCount_);
+        drawBuffer(vertexBuffer_.Get(), vertexCount_, nullptr, false, constants, textureEnabled);
     }
     ID3D11ShaderResourceView* nullSrv = nullptr;
     ctx_->PSSetShaderResources(0, 1, &nullSrv);
 }
 
-void WorldRenderer::drawBuffer(ID3D11Buffer* buffer, int vertexCount) {
+void WorldRenderer::drawBuffer(ID3D11Buffer* buffer, int vertexCount, ID3D11ShaderResourceView* texture, bool textureOverride, CameraConstants& constants, bool& textureEnabled) {
     if (!buffer || vertexCount <= 0) return;
+    ID3D11ShaderResourceView* activeTexture = textureOverride ? texture : texture_;
+    const bool nextTextureEnabled = activeTexture != nullptr;
+    if (nextTextureEnabled != textureEnabled) {
+        constants.useTexture = nextTextureEnabled ? 1.0f : 0.0f;
+        D3D11_MAPPED_SUBRESOURCE mapped;
+        if (SUCCEEDED(ctx_->Map(constantBuffer_.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped))) {
+            memcpy(mapped.pData, &constants, sizeof(constants));
+            ctx_->Unmap(constantBuffer_.Get(), 0);
+        }
+        textureEnabled = nextTextureEnabled;
+    }
+    ctx_->PSSetShaderResources(0, 1, &activeTexture);
     UINT stride = sizeof(WorldVertex), offset = 0;
     ctx_->IASetVertexBuffers(0, 1, &buffer, &stride, &offset);
     ctx_->Draw((UINT)vertexCount, 0);

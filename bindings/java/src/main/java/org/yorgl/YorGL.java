@@ -47,8 +47,27 @@ public final class YorGL implements AutoCloseable {
         return YorGLNative.backendName(handle);
     }
 
+    public RendererCapabilities getCapabilities() {
+        return new RendererCapabilities(YorGLNative.capabilities(handle));
+    }
+
+    public RenderDiagnostics getDiagnostics() {
+        return new RenderDiagnostics(YorGLNative.diagnostics(handle));
+    }
+
     public boolean createSwapChain(long windowHandle, int width, int height) {
         return YorGLNative.createSwapChain(handle, windowHandle, width, height);
+    }
+
+    public boolean createSwapChain(long windowHandle, SwapChainOptions options) {
+        return YorGLNative.createSwapChainWithOptions(
+            handle,
+            windowHandle,
+            options.width,
+            options.height,
+            options.bufferCount,
+            options.presentMode.id,
+            options.allowTearing);
     }
 
     public void resize(int width, int height) {
@@ -71,12 +90,20 @@ public final class YorGL implements AutoCloseable {
         YorGLNative.clearDepth(handle, depth);
     }
 
+    public void setPresentMode(PresentMode mode) {
+        YorGLNative.setPresentMode(handle, mode.id);
+    }
+
     public void endFrame() {
         YorGLNative.endFrame(handle);
     }
 
     public long createTexture(int width, int height, byte[] pixels) {
         return YorGLNative.createTexture(handle, width, height, pixels);
+    }
+
+    public boolean updateTextureRegion(long texture, int x, int y, int width, int height, byte[] pixels) {
+        return YorGLNative.updateTextureRegion(handle, texture, x, y, width, height, pixels);
     }
 
     public void destroyTexture(long texture) {
@@ -123,8 +150,12 @@ public final class YorGL implements AutoCloseable {
         YorGLNative.guiEnd(handle);
     }
 
+    public void cubemapRender(long[] faces, float yawRadians, int width, int height) {
+        YorGLNative.cubemapRender(handle, faces, yawRadians, width, height);
+    }
+
     public void panoramaRender(long[] faces, float angle, int width, int height) {
-        YorGLNative.panoramaRender(handle, faces, angle, width, height);
+        cubemapRender(faces, angle, width, height);
     }
 
     public void worldUploadMesh(float[] vertices, int floatCount) {
@@ -139,6 +170,10 @@ public final class YorGL implements AutoCloseable {
         YorGLNative.worldUploadSectionLayer(handle, sectionId, x, y, z, layer, vertices, floatCount);
     }
 
+    public void worldUploadSectionLayerTextured(long sectionId, int x, int y, int z, int layer, long texture, float[] vertices, int floatCount) {
+        YorGLNative.worldUploadSectionLayerTextured(handle, sectionId, x, y, z, layer, texture, vertices, floatCount);
+    }
+
     public void worldRemoveSection(long sectionId) {
         YorGLNative.worldRemoveSection(handle, sectionId);
     }
@@ -151,8 +186,16 @@ public final class YorGL implements AutoCloseable {
         YorGLNative.worldSetTexture(handle, texture);
     }
 
+    public void worldSetTextureFilter(TextureFilter filter) {
+        YorGLNative.worldSetTextureFilter(handle, filter.id);
+    }
+
     public void worldSetSkyColor(float r, float g, float b) {
         YorGLNative.worldSetSkyColor(handle, r, g, b);
+    }
+
+    public void worldSetFog(float r, float g, float b, float start, float end) {
+        YorGLNative.worldSetFog(handle, r, g, b, start, end);
     }
 
     public void worldRender(float cameraX, float cameraY, float cameraZ, float dirX, float dirY, float dirZ, float fovYDegrees, float farPlane, int width, int height) {
@@ -181,6 +224,18 @@ public final class YorGL implements AutoCloseable {
 
     public float sdfFontKerning(long font, int leftCodepoint, int rightCodepoint) {
         return YorGLNative.sdfFontKerning(handle, font, leftCodepoint, rightCodepoint);
+    }
+
+    public float sdfFontTextWidth(long font, String text, float scale) {
+        return YorGLNative.sdfFontTextWidth(handle, font, text, scale);
+    }
+
+    public float sdfFontLineHeight(long font, float scale) {
+        return YorGLNative.sdfFontLineHeight(handle, font, scale);
+    }
+
+    public void sdfFontDrawText(long font, String text, float x, float y, float scale, float r, float g, float b, float a, float weight, boolean shadow) {
+        YorGLNative.sdfFontDrawText(handle, font, text, x, y, scale, r, g, b, a, weight, shadow);
     }
 
     @Override
