@@ -1,8 +1,9 @@
 # YorEngine Roadmap
 
-YorEngine is the generic 3D engine layer above YorGL. Its goal is to make a
+YorEngine is the C++ generic 3D engine layer above YorGL. Its goal is to make a
 complete non-Minecraft game possible without turning YorGL into a game engine
-or moving Frost UI into either renderer project.
+or moving Frost UI into either renderer project. JVM/Kotlin code remains a
+secondary binding/adapter surface.
 
 The engine must remain usable as a library: every system has explicit lifetime,
 thread, ownership, serialization, and deterministic-update rules. A system is
@@ -11,9 +12,10 @@ implementation classes.
 
 ## Baseline: what exists today
 
-- Java module `org.yorgl:yorengine` with `Scene`, `SceneObject`, parent/child
-  transforms, `Component`, `Script`, `Camera`, `Light`, `Material`, and
-  `MeshComponent`.
+- Interim JVM module `org.yorgl:yorengine` with `Scene`, `SceneObject`,
+  parent/child transforms, `Component`, `Script`, `Camera`, `Light`,
+  `Material`, and `MeshComponent`; this is migration input, not the final
+  engine core.
 - Snapshot-safe component updates and a scene version for skipping unchanged
   mesh uploads.
 - Generic vertex baking into the current YorGL world vertex format.
@@ -21,7 +23,19 @@ implementation classes.
   render graph, animation, physics, audio, input abstraction, UI, editor,
   save format, networking, tooling, or complete sample game.
 
-## Phase 0 — Stable engine contracts
+## Phase 0 — C++ core and binding boundary
+
+- Create the C++ YorEngine target and public headers under `yorengine`, with a
+  dependency on YorGL only through its public API.
+- Move scene/object/component/transform/camera/light/material ownership into
+  C++ before adding new engine systems. Keep the JVM module as a thin binding
+  over those contracts; do not duplicate simulation in Java/Kotlin.
+- Define the C ABI or C++ facade boundary for bindings, opaque engine handles,
+  error/status behavior, lifetime, thread ownership, and versioning.
+- Keep the current JVM scene slice compiling only as a migration aid; delete it
+  once the C++ binding covers its documented use cases and tests.
+
+## Phase 1 — Stable engine contracts
 
 - Define `Engine`, `World`, `EntityId`, `Scene`, `ComponentStore`, `System`,
   `Transform`, `Camera`, `Light`, `Mesh`, `Material`, and `AssetHandle`

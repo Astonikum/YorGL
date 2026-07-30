@@ -18,10 +18,14 @@ This repository contains two build products with a hard ownership boundary:
 - `YorGL` is the low-level C++ renderer/API project. It owns the stable C ABI,
   native resource handles, backend implementations, and the JVM renderer
   binding.
-- `YorEngine` is the separate `yorengine` JVM module. It owns generic 3D scene
-  objects, components, transforms, cameras, lights, and the future engine
-  runtime. It does not own a graphics backend, Minecraft extraction, or a
-  retained UI toolkit.
+- `YorEngine` is the separate C++ engine project under `yorengine`. Its core
+  owns generic 3D scene objects, components, transforms, cameras, lights, and
+  the engine runtime. JVM/Kotlin code is only a secondary binding/adapter and
+  must not become the home of engine logic.
+
+The checked-in JVM scene classes are an interim migration slice from the old
+`YorGL3D` module. They are not the target engine architecture; the C++ core and
+its binding boundary are tracked in the [YorEngine roadmap](docs/yorengine-roadmap.md).
 
 Planned backends are added only when they render something real.
 
