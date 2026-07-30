@@ -1,79 +1,51 @@
 # YorGL
 
-YorGL is a rendering abstraction library:
+YorGL is the low-level, C++ rendering/API project in the YOR ecosystem:
 
 ```text
-Client code -> stable YorGL API -> switchable graphics backend
+Client or YorEngine -> stable YorGL API -> switchable graphics backend
 ```
 
-Current backend modules:
+It owns renderer resources, backend lifetime, command execution, the stable C
+ABI, the C++ backend boundary, and the secondary JVM binding. It does not own
+scenes, entities, components, gameplay rules, editor state, project manifests,
+or UI policy.
 
-- `null` - portable test backend.
-- `dx11` - Windows DirectX 11 backend.
+## Backends
 
-YorGL does not ship a retained UI toolkit. It exposes low-level drawing calls only; game engines own their menus, widgets, input, layout, animation, and styling.
+- `null` — portable deterministic test backend.
+- `dx11` — Windows DirectX 11 backend.
 
-This repository is becoming the YOR ecosystem with three hard product
-boundaries:
+DX11 is the current production backend target. Vulkan and other APIs enter the
+tree only through the same public backend contract and only with real rendering
+behavior plus tests; naming a future backend does not claim support.
 
-- `YorGL` is the low-level C++ renderer/API project. It owns the stable C ABI,
-  native resource handles, backend implementations, and the JVM renderer
-  binding.
-- `YorEngine` is the separate C++ engine project under `yorengine`. Its core
-  owns generic 3D scene objects, components, transforms, cameras, lights, and
-  the engine runtime. JVM/Kotlin code is only a secondary binding/adapter and
-  must not become the home of engine logic.
-- `YorStudio` is the planned C++ desktop launcher/editor under `yorstudio`.
-  It will own project lifecycle, editor commands, content tooling, and UI
-  adapters; it will not become a runtime dependency or duplicate YorEngine
-  state.
+YorGL does not ship a retained UI toolkit. Games and editors own their menus,
+widgets, input, layout, animation, and styling.
 
-The native build produces the `yorgl` renderer library, the `yorengine` C++
-static library, and the `yorengine_api` shared C binding. YorEngine currently
-exposes the foundational math and scene contracts; higher-level runtime systems
-are added only after
-their ownership, lifetime, threading, and test contracts are documented.
+## YOR repositories
 
-The checked-in JVM scene classes are an interim migration slice from the old
-`YorGL3D` module. They are not the target engine architecture; the C++ core and
-its binding boundary are tracked in the [YorEngine roadmap](docs/yorengine-roadmap.md).
+- [YorGL](https://github.com/Astonikum/YorGL) — this low-level renderer/API.
+- [YorEngine](https://github.com/Astonikum/YorEngine) — C++ runtime, scenes,
+  entities, components, assets, and rendering integration.
+- [YorStudio](https://github.com/Astonikum/YorStudio) — C++ project launcher
+  and editor.
 
-Planned backends are added only when they render something real.
+The dependency direction is one-way: `YorStudio -> YorEngine -> YorGL`.
+YorGL never depends on YorEngine. When a higher-level product consumes YorGL,
+it uses the canonical Git repository pinned to a release tag or immutable
+commit; released builds never follow a moving `main` branch.
 
 ## Documentation
 
 - [Architecture](docs/architecture.md)
 - [C API](docs/c-api.md)
-- [Java Binding](docs/java-binding.md)
-- [YorEngine](docs/yorengine.md)
-- [DX11 Backend](docs/dx11-backend.md)
+- [Java binding](docs/java-binding.md)
+- [DX11 backend](docs/dx11-backend.md)
 - [YorGL roadmap](docs/yorgl-roadmap.md)
-- [YorEngine roadmap](docs/yorengine-roadmap.md)
-- [YOR ecosystem](docs/yor-ecosystem.md)
-- [YorStudio](docs/yorstudio.md)
-- [YorStudio roadmap](docs/yorstudio-roadmap.md)
-- [Security Policy](SECURITY.md)
+- [Security policy](SECURITY.md)
 
-## Use From Gradle Git Source Dependency
-
-```kotlin
-// settings.gradle.kts
-sourceControl {
-    gitRepository(uri("https://github.com/Astonikum/YorGL.git")) {
-        producesModule("org.yorgl:yorgl")
-    }
-}
-
-// build.gradle.kts
-dependencies {
-    implementation("org.yorgl:yorgl:0.1.0-SNAPSHOT")
-    implementation("org.yorgl:yorengine:0.1.0-SNAPSHOT")
-}
-```
-
-The JVM artifact bundles `yorgl.dll` for Windows x64 and extracts it on `YorGL.load()`.
-
-## Build Native
+## Build native library
 
 ```powershell
 cmake -S . -B build -DYORGL_BUILD_DX11=ON
@@ -81,25 +53,22 @@ cmake --build build --config Release
 ctest --test-dir build -C Release --output-on-failure
 ```
 
-Use `-DYORGL_BUILD_YORENGINE=OFF` only when a renderer-only build is required.
-The default build includes YorEngine and its native smoke test.
+The `null` backend keeps Linux and other non-Windows builds portable. DX11 is
+enabled only on Windows. Add `-DYORGL_BUILD_JNI=OFF` when JNI headers are not
+available.
 
-YorStudio is currently at the contract/roadmap stage. Its first executable
-will be added only with a tested project manifest, launcher lifecycle, platform
-window, and replaceable UI boundary; there is intentionally no placeholder
-ImGui executable in the native build yet.
-
-## Build JVM Artifact
+## Build JVM artifact
 
 ```powershell
 ./gradlew build
 ```
 
-## Releases
+The JVM artifact is a secondary binding. It bundles `yorgl.dll` for Windows
+x64 and extracts it when `YorGL.load()` is called; native C++ remains the
+source of truth.
 
-CI runs on every push and pull request. Tags that start with `v` create a
-GitHub Release with:
+## Releases and CI
 
-- JVM jar built on Windows with the bundled `yorgl.dll`.
-- Native CMake install package for Windows x64 with DX11 enabled.
-- Portable native CMake install package with the null backend on Linux.
+Every push and pull request runs native smoke tests on Linux and Windows plus
+the JVM binding build. Tags beginning with `v` publish a GitHub Release with
+the tested native install packages and Windows JVM artifact.

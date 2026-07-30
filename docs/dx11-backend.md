@@ -30,7 +30,8 @@ The DirectX 11 backend lives in `src/backends/dx11`.
 
 ## Boundaries
 
-The DX11 backend does not contain Minecraft, FrostEngine, or game object types. It accepts only generic handles, numbers, and vertex arrays from `src/yorgl/api.h`.
+The DX11 backend does not contain game-specific object types. It accepts only
+generic handles, numbers, and vertex arrays from `src/yorgl/api.h`.
 
 ## Build Flag
 

@@ -2,37 +2,40 @@
 
 YorGL has three renderer layers:
 
-- Client bindings: JVM/Kotlin/Java now, more languages later.
-- API: C ABI and C++ facade in `src/yorgl`.
-- Backend modules: `src/backends/*`.
+- client bindings: JVM/Kotlin/Java now, more languages later;
+- API: stable C ABI and C++ facade in `src/yorgl`;
+- backend modules: `src/backends/*`.
 
-YorEngine is a separate C++ target under `yorengine`. C++ is the primary
-implementation language for both projects. JVM/Kotlin/Java code is limited to
-bindings and transitional adapters; it must not duplicate engine simulation or
-renderer ownership.
+## Boundaries
 
-YorStudio is a separate planned C++ desktop target under `yorstudio`. Its
-project model, editor commands, content tools, and editor state remain above
-YorEngine. Dear ImGui is confined to the YorStudio UI adapter; ImGui headers
-must not enter YorGL, YorEngine, or project/document models.
+- C++ is the authoritative implementation language.
+- Kotlin/Java/JVM is secondary binding/tooling code and must not own renderer
+  state or simulation.
+- YorGL never contains YorEngine scenes, gameplay, project files, editor state,
+  FrostEngine/Minecraft rules, or ImGui headers.
+- YorEngine and YorStudio are independent repositories above this project.
+  Their Git dependencies must use a release tag or immutable commit.
 
-Rules:
+## Backend rules
 
-- `null` backend must stay buildable on every platform.
+- The `null` backend stays buildable on every supported platform.
 - DX11 code stays behind `YORGL_BUILD_DX11` and Windows checks.
-- Do not add a new backend until it can clear and present a frame.
-- Do not put Minecraft/FrostEngine concepts in YorGL.
-- Every public C API or Kotlin API addition gets a matching English doc page update.
-- Kotlin artifact builds must keep bundled native loading working on Windows x64.
-- Every public YorEngine C++ API addition gets matching English documentation
-  and a native test that exercises its ownership and failure behavior.
-- YorStudio project files must be versioned separately from `.yor/` caches,
-  generated data, and build output. Project discovery must not execute project
-  code or plugins.
-- YorStudio editor writes go through commands/transactions and public
-  YorEngine APIs; no private Scene storage access.
+- A backend enters the public tree only when it can execute real commands,
+  present a frame where applicable, and has focused tests.
+- New backend work must preserve the stable API/resource ownership contract.
 
-## Local Checks
+## API and binding rules
+
+- Every public C/C++ API change gets English documentation and native tests for
+  ownership, failure behavior, and compatibility.
+- Every JVM API change gets matching docs and keeps Windows x64 native loading
+  working.
+- Renderer modules must not leak backend-specific types through the portable
+  public API.
+- Keep commits focused, use `<version>-<task>` branches, and push after each
+  meaningful commit so CI remains visible.
+
+## Local checks
 
 ```powershell
 ./gradlew build
@@ -41,14 +44,8 @@ cmake --build build-null --config Debug
 ctest --test-dir build-null -C Debug --output-on-failure
 ```
 
-The command above builds both native targets by default. To test YorEngine in
-an isolated configuration, use `-DYORGL_BUILD_YORENGINE=ON` and run the
-`yorengine_smoke` test reported by CTest.
-
 ## CI/CD
 
-- `.github/workflows/ci.yml` builds native smoke tests on Linux and Windows,
-  builds the JVM artifact on Linux, and builds the Windows JVM artifact with
-  bundled `yorgl.dll`.
-- `.github/workflows/release.yml` runs on `v*` tags and attaches Kotlin/native
-  packages to the GitHub Release.
+`.github/workflows/ci.yml` builds native smoke tests on Linux and Windows and
+the JVM artifact on Linux and Windows. `.github/workflows/release.yml` runs on
+`v*` tags and attaches tested native/JVM packages to the GitHub Release.
