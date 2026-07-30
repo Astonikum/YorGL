@@ -1,5 +1,6 @@
 add_library(yorengine STATIC
     src/math.cpp
+    src/runtime.cpp
     src/scene.cpp
 )
 
@@ -48,6 +49,10 @@ if (YORGL_BUILD_TESTS)
     add_executable(yorengine_smoke tests/scene_smoke.cpp)
     target_link_libraries(yorengine_smoke PRIVATE yorengine)
     add_test(NAME yorengine_smoke COMMAND yorengine_smoke)
+
+    add_executable(yorengine_runtime_smoke tests/runtime_smoke.cpp)
+    target_link_libraries(yorengine_runtime_smoke PRIVATE yorengine)
+    add_test(NAME yorengine_runtime_smoke COMMAND yorengine_runtime_smoke)
 
     add_executable(yorengine_api_smoke tests/api_smoke.cpp)
     target_link_libraries(yorengine_api_smoke PRIVATE yorengine_api)

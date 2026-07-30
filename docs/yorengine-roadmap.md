@@ -24,12 +24,14 @@ implementation classes.
 - Native Debug and Release smoke coverage for the above contracts.
 - Thin `org.yorengine.NativeScene` JNI adapter with native DLL packaging and a
   Windows JVM smoke test; it owns no duplicate scene state.
+- C++ `Runtime` with fixed-step scheduling, bounded catch-up, deterministic
+  system order, pause/stop/single-step, and deferred system destruction.
 - Interim JVM module `org.yorgl:yorengine` with `Scene`, `SceneObject`,
   parent/child transforms, `Component`, `Script`, `Camera`, `Light`,
   `Material`, and `MeshComponent`; this remains migration input and must not
   grow duplicate engine logic.
-- No engine loop, stable render snapshots, asset database, material/shader
-  system, render graph, animation, physics, audio, input abstraction, UI,
+- No stable render snapshots, asset database, material/shader system, render
+  graph, animation, physics, audio, input abstraction, UI,
   editor, save format, networking, tooling, or complete sample game.
 
 ## Phase 0 - C++ core and binding boundary
@@ -73,8 +75,11 @@ implementation classes.
 
 ## Phase 2 - Runtime and scene model
 
-- Add an engine lifecycle with startup, fixed simulation ticks, variable render
-  ticks, pause, single-step, shutdown, and failure propagation.
+- [x] Add the first engine lifecycle with fixed simulation ticks, pause,
+  single-step, shutdown, deterministic system order, bounded catch-up, and
+  failure propagation.
+- [ ] Add variable render ticks, explicit startup/shutdown service ownership,
+  and render-thread handoff contracts.
 - Make component attach/detach/dispose behavior explicit; support command
   buffers for structural changes during iteration and define ordering rules.
 - Add scene loading/instantiation, nested scenes/prefabs, tags/layers, queries,
