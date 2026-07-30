@@ -15,6 +15,21 @@ Renderer instance
 Null / DX11 / future backend
 ```
 
+## Project Boundary
+
+The repository contains two separate build products:
+
+- **YorGL** is the low-level renderer project. It owns the C ABI, C++ backend
+  interface, native resource lifetime, command execution, and the thin JVM
+  binding under `bindings/java`.
+- **YorEngine** is the optional `yorengine` JVM module above YorGL. It owns
+  generic scene graphs, objects, components, transforms, cameras, lights,
+  materials, and future engine runtime systems.
+
+YorEngine may depend on YorGL, but YorGL must never depend on YorEngine. The
+engine does not move Minecraft extraction, gameplay rules, networking, or
+Frost UI into the renderer library.
+
 ## Layers
 
 - **Client bindings** call the C API from Java, Kotlin, and future languages.

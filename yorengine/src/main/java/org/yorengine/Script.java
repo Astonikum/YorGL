@@ -1,4 +1,4 @@
-package org.yorgl3d;
+package org.yorengine;
 
 @FunctionalInterface
 public interface Script extends Component {

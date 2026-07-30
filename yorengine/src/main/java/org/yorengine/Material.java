@@ -1,4 +1,4 @@
-package org.yorgl3d;
+package org.yorengine;
 
 public final class Material {
     private String name = "";

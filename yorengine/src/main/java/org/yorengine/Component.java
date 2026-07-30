@@ -1,4 +1,4 @@
-package org.yorgl3d;
+package org.yorengine;
 
 public interface Component {
     default void onAttach(SceneObject object) {

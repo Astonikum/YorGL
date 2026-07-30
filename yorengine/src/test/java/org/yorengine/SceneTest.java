@@ -1,4 +1,4 @@
-package org.yorgl3d;
+package org.yorengine;
 
 public final class SceneTest {
     public static void main(String[] args) {

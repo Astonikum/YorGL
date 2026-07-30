@@ -13,9 +13,15 @@ Current backend modules:
 
 YorGL does not ship a retained UI toolkit. It exposes low-level drawing calls only; game engines own their menus, widgets, input, layout, animation, and styling.
 
-`yorgl3d` is an optional JVM module with low-level scene objects, transforms,
-components, scripts, cameras, lights, and mesh baking helpers for clients that
-want a small object/component layer above the raw renderer.
+This repository contains two build products with a hard ownership boundary:
+
+- `YorGL` is the low-level C++ renderer/API project. It owns the stable C ABI,
+  native resource handles, backend implementations, and the JVM renderer
+  binding.
+- `YorEngine` is the separate `yorengine` JVM module. It owns generic 3D scene
+  objects, components, transforms, cameras, lights, and the future engine
+  runtime. It does not own a graphics backend, Minecraft extraction, or a
+  retained UI toolkit.
 
 Planned backends are added only when they render something real.
 
@@ -24,8 +30,10 @@ Planned backends are added only when they render something real.
 - [Architecture](docs/architecture.md)
 - [C API](docs/c-api.md)
 - [Java Binding](docs/java-binding.md)
-- [YorGL3D](docs/yorgl3d.md)
+- [YorEngine](docs/yorengine.md)
 - [DX11 Backend](docs/dx11-backend.md)
+- [YorGL roadmap](docs/yorgl-roadmap.md)
+- [YorEngine roadmap](docs/yorengine-roadmap.md)
 - [Security Policy](SECURITY.md)
 
 ## Use From Gradle Git Source Dependency
@@ -41,7 +49,7 @@ sourceControl {
 // build.gradle.kts
 dependencies {
     implementation("org.yorgl:yorgl:0.1.0-SNAPSHOT")
-    implementation("org.yorgl:yorgl3d:0.1.0-SNAPSHOT")
+    implementation("org.yorgl:yorengine:0.1.0-SNAPSHOT")
 }
 ```
 

@@ -1,4 +1,4 @@
-package org.yorgl3d;
+package org.yorengine;
 
 public record Vec3(float x, float y, float z) {
     public static final Vec3 ZERO = new Vec3(0.0f, 0.0f, 0.0f);
