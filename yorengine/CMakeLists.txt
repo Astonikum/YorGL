@@ -26,6 +26,14 @@ target_include_directories(yorengine_api PUBLIC
 )
 target_compile_definitions(yorengine_api PRIVATE YORENGINE_BUILDING_DLL)
 
+if (YORGL_BUILD_JNI)
+    find_package(JNI)
+    if (JNI_FOUND)
+        target_sources(yorengine_api PRIVATE src/jni/yorengine_jni.cpp)
+        target_include_directories(yorengine_api PRIVATE ${JNI_INCLUDE_DIRS})
+    endif()
+endif()
+
 if (MSVC)
     target_compile_options(yorengine_api PRIVATE /W4 /permissive-)
 else()

@@ -55,6 +55,13 @@ thread. Generic user-defined C++ components are intentionally not exposed as
 fake C handles; a later binding design must specify their ownership and
 callback lifecycle first.
 
+The JVM artifact now contains `org.yorengine.NativeScene`, a thin JNI adapter
+over this C API. It owns only the native scene handle and immutable value
+conversions (`EntityId`, transforms, matrices, camera/light state); all scene
+and component state remains in C++. The older `org.yorengine.Scene` classes
+remain a compatibility/migration slice and must not receive new engine
+ownership.
+
 Minimal native usage:
 
 ```cpp

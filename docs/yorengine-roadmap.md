@@ -22,6 +22,8 @@ implementation classes.
 - Snapshot-safe C++ component updates, attach/detach hooks, safe removal during
   iteration, and initial mesh/camera/light components.
 - Native Debug and Release smoke coverage for the above contracts.
+- Thin `org.yorengine.NativeScene` JNI adapter with native DLL packaging and a
+  Windows JVM smoke test; it owns no duplicate scene state.
 - Interim JVM module `org.yorgl:yorengine` with `Scene`, `SceneObject`,
   parent/child transforms, `Component`, `Script`, `Camera`, `Light`,
   `Material`, and `MeshComponent`; this remains migration input and must not
@@ -39,6 +41,8 @@ implementation classes.
 - [x] Add the initial `yorengine_api` C binding with opaque scenes,
   generation-checked ids, status results, metadata, transforms, and built-in
   render-facing components.
+- [x] Add the first JVM/JNI adapter over that C binding, with resource
+  extraction and a Windows lifecycle smoke test.
 - [ ] Add a focused C++ test library and split smoke coverage into math, scene,
   component, and contract suites as the API expands.
 - [ ] Move all scene/object/component/transform/camera/light/material ownership
