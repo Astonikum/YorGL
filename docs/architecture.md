@@ -27,10 +27,11 @@ The repository contains two separate build products:
   materials, and engine runtime systems. JVM/Kotlin code is only a secondary
   binding/adapter layer.
 
-The native build keeps the two libraries as separate targets: `yorgl` is the
-renderer library and `yorengine` is the engine library. YorEngine's public
-headers are under `yorengine/include/yorengine`; the engine may call YorGL
-through a future public renderer facade, but the current scene core has no
+The native build keeps the projects as separate targets: `yorgl` is the
+renderer library, while `yorengine` is the C++ engine library and
+`yorengine_api` is its shared C binding boundary. YorEngine's public headers
+are under `yorengine/include/yorengine`; the engine may call YorGL through a
+future public renderer facade, but the current scene core has no
 backend-specific dependency.
 
 YorEngine may depend on YorGL, but YorGL must never depend on YorEngine. The

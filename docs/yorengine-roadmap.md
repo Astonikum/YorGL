@@ -34,13 +34,16 @@ implementation classes.
 - [x] Establish the first public math, entity, hierarchy, component, camera,
   light, and mesh contracts without a YorGL/backend dependency.
 - [x] Add native Debug and Release smoke coverage for the first contracts.
+- [x] Add the initial `yorengine_api` C binding with opaque scenes,
+  generation-checked ids, status results, metadata, transforms, and built-in
+  render-facing components.
 - [ ] Add a focused C++ test library and split smoke coverage into math, scene,
   component, and contract suites as the API expands.
 - [ ] Move all scene/object/component/transform/camera/light/material ownership
   into C++ before adding new engine systems. JVM remains a thin binding and
   must not duplicate simulation in Java/Kotlin.
-- [ ] Define the C ABI or C++ facade boundary for bindings, opaque engine
-  handles, error/status behavior, lifetime, thread ownership, and versioning.
+- [ ] Expand the C ABI or C++ facade boundary for thread ownership, callback
+  lifecycle, serialization/versioning, and the remaining engine contracts.
 - [ ] Replace the transitional JVM scene implementation with a thin binding
   after the native API has stable lifetime and error semantics.
 - [ ] Delete the transitional JVM scene module once the binding covers its

@@ -28,8 +28,27 @@ currently provides:
 
 The native scene core deliberately does not claim to be a complete runtime
 yet: asset loading, render submission, physics, animation, audio, input,
-serialization, editor tooling, and the public binding ABI are later roadmap
-systems.
+serialization, editor tooling, and the remainder of the public binding
+contract are later roadmap systems.
+
+## C Binding Boundary
+
+`yorengine_api` is the first stable C binding boundary for the native core. It
+uses an opaque `YorEngineScene*`, generation-checked `YorEngineEntityId`
+values, explicit `YorEngineStatus` results, and a thread-local diagnostic from
+`yorengineLastError()`. C++ exceptions never cross this ABI. The current C
+surface covers:
+
+- scene/entity lifetime, parent links, transforms, world matrices, active state,
+  updates, versioning, and string metadata;
+- built-in mesh vertex transfer with caller-owned buffers;
+- camera and light component creation, queries, and validated updates.
+
+`YorEngineMat4` values are column-major, matching the native `Mat4` contract.
+The error string remains valid until the next YorEngine C API call on the same
+thread. Generic user-defined C++ components are intentionally not exposed as
+fake C handles; a later binding design must specify their ownership and
+callback lifecycle first.
 
 Minimal native usage:
 

@@ -22,7 +22,13 @@ void requireFiniteNonNegative(float value, const char* name) {
 void Component::attach(Scene& scene, EntityId entity) {
     ownerScene_ = &scene;
     ownerEntity_ = entity;
-    onAttach(scene, entity);
+    try {
+        onAttach(scene, entity);
+    } catch (...) {
+        ownerScene_ = nullptr;
+        ownerEntity_ = {};
+        throw;
+    }
 }
 
 void Component::detach(Scene& scene, EntityId entity) {

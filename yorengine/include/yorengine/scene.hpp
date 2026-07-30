@@ -196,8 +196,13 @@ T& Scene::emplaceComponent(EntityId entity, Args&&... args) {
         throw std::logic_error("Entity already has this component type");
     }
     auto value = std::make_shared<T>(std::forward<Args>(args)...);
-    value->attach(*this, entity);
     slot.components.push_back(value);
+    try {
+        value->attach(*this, entity);
+    } catch (...) {
+        slot.components.pop_back();
+        throw;
+    }
     markChanged();
     return *value;
 }
