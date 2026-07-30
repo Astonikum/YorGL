@@ -25,7 +25,7 @@ jobs:
         run: |
           New-Item -ItemType Directory -Force dist | Out-Null
           Copy-Item build/libs/*.jar dist/
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: yorgl-kotlin-windows-x64
           path: dist/*
@@ -57,7 +57,7 @@ jobs:
         run: ctest --test-dir build --output-on-failure -C Release
       - name: Install
         run: cmake --install build --config Release --prefix dist/yorgl-native-${{ matrix.name }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: yorgl-native-${{ matrix.name }}
           path: dist/yorgl-native-${{ matrix.name }}/**
