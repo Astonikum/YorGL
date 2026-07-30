@@ -12,71 +12,87 @@ implementation classes.
 
 ## Baseline: what exists today
 
+- C++20 `yorengine` static library with public `math.hpp` and `scene.hpp`.
+- `Vec3`, `Quaternion`, `Mat4`, and `Transform`, including tested local/world
+  transform composition.
+- Generation-checked entity ids, deterministic enumeration, hierarchy cycle
+  rejection, cascading destruction, active state, metadata, and versioning.
+- Snapshot-safe C++ component updates, attach/detach hooks, safe removal during
+  iteration, and initial mesh/camera/light components.
+- Native Debug and Release smoke coverage for the above contracts.
 - Interim JVM module `org.yorgl:yorengine` with `Scene`, `SceneObject`,
   parent/child transforms, `Component`, `Script`, `Camera`, `Light`,
-  `Material`, and `MeshComponent`; this is migration input, not the final
-  engine core.
-- Snapshot-safe component updates and a scene version for skipping unchanged
-  mesh uploads.
-- Generic vertex baking into the current YorGL world vertex format.
-- No engine loop, stable entity ids, asset database, material/shader system,
-  render graph, animation, physics, audio, input abstraction, UI, editor,
-  save format, networking, tooling, or complete sample game.
+  `Material`, and `MeshComponent`; this remains migration input and must not
+  grow duplicate engine logic.
+- No engine loop, stable render snapshots, asset database, material/shader
+  system, render graph, animation, physics, audio, input abstraction, UI,
+  editor, save format, networking, tooling, or complete sample game.
 
-## Phase 0 — C++ core and binding boundary
+## Phase 0 - C++ core and binding boundary
 
-- Create the C++ YorEngine target and public headers under `yorengine`, with a
-  dependency on YorGL only through its public API.
-- Move scene/object/component/transform/camera/light/material ownership into
-  C++ before adding new engine systems. Keep the JVM module as a thin binding
-  over those contracts; do not duplicate simulation in Java/Kotlin.
-- Define the C ABI or C++ facade boundary for bindings, opaque engine handles,
-  error/status behavior, lifetime, thread ownership, and versioning.
-- Keep the current JVM scene slice compiling only as a migration aid; delete it
-  once the C++ binding covers its documented use cases and tests.
+- [x] Create the C++ YorEngine target and public headers under `yorengine`.
+- [x] Establish the first public math, entity, hierarchy, component, camera,
+  light, and mesh contracts without a YorGL/backend dependency.
+- [x] Add native Debug and Release smoke coverage for the first contracts.
+- [ ] Add a focused C++ test library and split smoke coverage into math, scene,
+  component, and contract suites as the API expands.
+- [ ] Move all scene/object/component/transform/camera/light/material ownership
+  into C++ before adding new engine systems. JVM remains a thin binding and
+  must not duplicate simulation in Java/Kotlin.
+- [ ] Define the C ABI or C++ facade boundary for bindings, opaque engine
+  handles, error/status behavior, lifetime, thread ownership, and versioning.
+- [ ] Replace the transitional JVM scene implementation with a thin binding
+  after the native API has stable lifetime and error semantics.
+- [ ] Delete the transitional JVM scene module once the binding covers its
+  documented use cases and tests.
 
-## Phase 1 — Stable engine contracts
+## Phase 1 - Stable engine contracts
 
 - Define `Engine`, `World`, `EntityId`, `Scene`, `ComponentStore`, `System`,
-  `Transform`, `Camera`, `Light`, `Mesh`, `Material`, and `AssetHandle`
-  ownership without exposing mutable implementation collections.
-- Add stable numeric ids, generation checks, explicit active/destroyed states,
-  parent-cycle validation, and deterministic iteration order.
-- Separate simulation state, render snapshots, and editor/debug metadata.
-- Define units, coordinate handedness, radians/degrees policy, depth range,
-  color space, threading model, and serialization versioning.
+  `Transform`, `Camera`, `Light`, `Mesh`, `Material`, and `AssetHandle` without
+  exposing mutable implementation collections.
+- Finalize stable numeric ids, generation checks, active/destroyed states,
+  parent-cycle validation, deterministic iteration order, and query semantics.
+- Separate simulation state, render snapshots, editor/debug metadata, and
+  transient frame data.
+- Document units, coordinate handedness, radians/degrees policy, depth range,
+  color space, threading model, exception/status policy, and serialization
+  versioning.
 - Replace string-only custom properties with typed extension data while keeping
   a small metadata escape hatch for integrations.
+- Add ABI/API compatibility tests and a versioned public-header compile test.
 
-## Phase 1 — Runtime and scene model
+## Phase 2 - Runtime and scene model
 
 - Add an engine lifecycle with startup, fixed simulation ticks, variable render
   ticks, pause, single-step, shutdown, and failure propagation.
-- Make component attach/detach/dispose behavior explicit; support safe command
-  buffers for structural changes during iteration.
+- Make component attach/detach/dispose behavior explicit; support command
+  buffers for structural changes during iteration and define ordering rules.
 - Add scene loading/instantiation, nested scenes/prefabs, tags/layers, queries,
   visibility flags, spawn/despawn events, and stable references.
 - Add transform dirty propagation, cached world matrices, bounds, parent
   reparenting, and a render snapshot that cannot mutate during draw submission.
 - Add a generic input/event adapter and time source. Minecraft/Frost input and
-  gameplay remain on the FrostEngine side; YorEngine consumes generic events.
+  gameplay remain on FrostEngine; YorEngine consumes generic events.
+- Add runtime diagnostics for invalid handles, duplicate components, cycles,
+  failed systems, and structural command errors.
 
-## Phase 2 — Assets, materials, and rendering integration
+## Phase 3 - Assets, materials, and rendering integration
 
 - Define asynchronous asset handles, loaders, cancellation, dependency graphs,
   hot reload, cache eviction, and shutdown-safe upload queues.
 - Add mesh/index/instance formats, tangent generation, skin weights, bounds,
-  LODs, meshlets only after profiling, and a material graph that compiles to
-  YorGL pipeline/resource descriptions.
+  LODs, and meshlets only after profiling proves the need.
+- Add a material graph that compiles to YorGL pipeline/resource descriptions;
+  keep renderer backend details out of engine code.
 - Add texture color-space/alpha metadata, sampler policy, shader includes,
   reflection validation, permutation limits, and material defaults.
 - Build a renderer integration that submits cameras, opaque/masked/translucent
-  queues, shadows, sky, particles, post effects, and debug geometry to YorGL;
-  never make the engine issue backend-specific DirectX calls.
+  queues, shadows, sky, particles, post effects, and debug geometry to YorGL.
 - Add render-layer sorting, frustum/occlusion culling, instancing, batching,
-  visibility history, and frame capture labels.
+  visibility history, frame capture labels, and GPU/CPU timing markers.
 
-## Phase 3 — Cameras, lighting, and world quality
+## Phase 4 - Cameras, lighting, and world quality
 
 - Add perspective/orthographic cameras, exposure, jitter, camera cuts, stereo
   views, and explicit depth/motion-vector outputs.
@@ -87,9 +103,11 @@ implementation classes.
   image-based lighting, sky atmosphere, fog, decals, transparency, and a
   documented fallback path for low-end hardware.
 - Add terrain/streaming worlds, sectors, occlusion data, instanced foliage,
-  and bounded upload budgets without making the core scene Minecraft-specific.
+  and bounded upload budgets without making the core Minecraft-specific.
+- Validate the lighting stack against reference scenes and image-difference
+  tolerances on every supported backend.
 
-## Phase 4 — Animation and gameplay-ready simulation
+## Phase 5 - Animation and gameplay-ready simulation
 
 - Add skeletal animation clips, blending graphs, state machines, root motion,
   inverse kinematics, morph targets, animation events, and deterministic pose
@@ -100,8 +118,9 @@ implementation classes.
   bounds, collision policy, and render-queue integration.
 - Add audio devices, buses, spatial emitters, streaming music, effects, and
   pause/visibility behavior behind an optional dependency.
+- Add deterministic replay hooks for simulation bugs and gameplay tests.
 
-## Phase 5 — Game services and content pipeline
+## Phase 6 - Game services and content pipeline
 
 - Add save/load with schema versions, migrations, atomic writes, checksums, and
   safe recovery from partial files.
@@ -111,12 +130,12 @@ implementation classes.
 - Add a content build pipeline for source assets, imported metadata, dependency
   manifests, compression, shader compilation, thumbnails, and reproducible
   cache keys.
-- Add optional networking primitives only for generic game sessions; FrostEngine
-  remains the owner of Minecraft networking and gameplay truth.
+- Add optional networking primitives only for generic game sessions;
+  FrostEngine remains the owner of Minecraft networking and gameplay truth.
 - Add scripting/plugin boundaries with capability-limited services, reload
   rules, error isolation, and explicit deterministic vs nondeterministic APIs.
 
-## Phase 6 — Tools and editor
+## Phase 7 - Tools and editor
 
 - Add an inspectable world format, editor-only metadata, undo/redo commands,
   selection, gizmos, hierarchy view, material/asset inspection, and play-mode
@@ -128,7 +147,7 @@ implementation classes.
 - Keep editor/UI implementation replaceable and separate from Frost UI; the
   engine exposes data and render hooks, not a retained Frost menu toolkit.
 
-## Phase 7 — Shipping one complete game
+## Phase 8 - Shipping one complete game
 
 - Build one small but complete reference game using only public YorEngine APIs:
   title/settings screens, loading, save/load, input rebinding, one streamed
@@ -144,8 +163,8 @@ implementation classes.
 
 ## Definition of done
 
-YorEngine is "done" for this roadmap when an independent game can implement its
-simulation, content, scenes, rendering, animation, physics, audio, saves, input,
-tooling, and shipping loop through public engine contracts, while YorGL remains
-replaceable and FrostEngine can continue to own Minecraft extraction, gameplay,
-networking, and Frost UI.
+YorEngine is done for this roadmap when an independent game can implement its
+simulation, content, scenes, rendering, animation, physics, audio, saves,
+input, tooling, and shipping loop through public engine contracts, while YorGL
+remains replaceable and FrostEngine can continue to own Minecraft extraction,
+gameplay, networking, and Frost UI.

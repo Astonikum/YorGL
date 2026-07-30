@@ -23,6 +23,11 @@ This repository contains two build products with a hard ownership boundary:
   the engine runtime. JVM/Kotlin code is only a secondary binding/adapter and
   must not become the home of engine logic.
 
+The native build produces both the `yorgl` renderer library and the
+`yorengine` C++ static library. YorEngine currently exposes the foundational
+math and scene contracts; higher-level runtime systems are added only after
+their ownership, lifetime, threading, and test contracts are documented.
+
 The checked-in JVM scene classes are an interim migration slice from the old
 `YorGL3D` module. They are not the target engine architecture; the C++ core and
 its binding boundary are tracked in the [YorEngine roadmap](docs/yorengine-roadmap.md).
@@ -66,6 +71,9 @@ cmake -S . -B build -DYORGL_BUILD_DX11=ON
 cmake --build build --config Release
 ctest --test-dir build -C Release --output-on-failure
 ```
+
+Use `-DYORGL_BUILD_YORENGINE=OFF` only when a renderer-only build is required.
+The default build includes YorEngine and its native smoke test.
 
 ## Build JVM Artifact
 

@@ -27,6 +27,12 @@ The repository contains two separate build products:
   materials, and engine runtime systems. JVM/Kotlin code is only a secondary
   binding/adapter layer.
 
+The native build keeps the two libraries as separate targets: `yorgl` is the
+renderer library and `yorengine` is the engine library. YorEngine's public
+headers are under `yorengine/include/yorengine`; the engine may call YorGL
+through a future public renderer facade, but the current scene core has no
+backend-specific dependency.
+
 YorEngine may depend on YorGL, but YorGL must never depend on YorEngine. The
 engine does not move Minecraft extraction, gameplay rules, networking, or
 Frost UI into the renderer library. The current JVM scene slice is transitional

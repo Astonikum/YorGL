@@ -1,10 +1,15 @@
 # Development
 
-YorGL has three layers:
+YorGL has three renderer layers:
 
-- Client bindings: Kotlin now, more languages later.
+- Client bindings: JVM/Kotlin/Java now, more languages later.
 - API: C ABI and C++ facade in `src/yorgl`.
 - Backend modules: `src/backends/*`.
+
+YorEngine is a separate C++ target under `yorengine`. C++ is the primary
+implementation language for both projects. JVM/Kotlin/Java code is limited to
+bindings and transitional adapters; it must not duplicate engine simulation or
+renderer ownership.
 
 Rules:
 
@@ -14,6 +19,8 @@ Rules:
 - Do not put Minecraft/FrostEngine concepts in YorGL.
 - Every public C API or Kotlin API addition gets a matching English doc page update.
 - Kotlin artifact builds must keep bundled native loading working on Windows x64.
+- Every public YorEngine C++ API addition gets matching English documentation
+  and a native test that exercises its ownership and failure behavior.
 
 ## Local Checks
 
@@ -23,6 +30,10 @@ cmake -S . -B build-null -DYORGL_BUILD_DX11=OFF -DYORGL_BUILD_TESTS=ON
 cmake --build build-null --config Debug
 ctest --test-dir build-null -C Debug --output-on-failure
 ```
+
+The command above builds both native targets by default. To test YorEngine in
+an isolated configuration, use `-DYORGL_BUILD_YORENGINE=ON` and run the
+`yorengine_smoke` test reported by CTest.
 
 ## CI/CD
 

@@ -8,7 +8,49 @@ The existing `org.yorgl:yorengine` JVM artifact is an interim migration slice
 left by the old `YorGL3D` module. It must not become the engine core or receive
 new gameplay/runtime ownership.
 
-## Current Scope
+## Current C++ Scope
+
+The first native YorEngine slice is now a standalone C++20 static library
+(`yorengine`) with public headers under `yorengine/include/yorengine`. It
+currently provides:
+
+- `Vec3`, `Quaternion`, `Mat4`, and `Transform` math with explicit column-major
+  matrix semantics and `T * R * S` local transforms;
+- generation-checked `EntityId` values with stale-handle rejection and index
+  reuse;
+- `Scene` entity creation/destruction, deterministic entity enumeration,
+  parent/child hierarchy, cycle rejection, local/world transforms, active state,
+  version tracking, and string metadata;
+- a snapshot-safe `Component` lifecycle with attach/detach/update hooks and
+  safe structural removal during update;
+- generic custom components plus initial `MeshComponent`, `CameraComponent`,
+  and `LightComponent` data contracts with input validation.
+
+The native scene core deliberately does not claim to be a complete runtime
+yet: asset loading, render submission, physics, animation, audio, input,
+serialization, editor tooling, and the public binding ABI are later roadmap
+systems.
+
+Minimal native usage:
+
+```cpp
+#include "yorengine/scene.hpp"
+
+yorengine::Scene scene;
+const yorengine::EntityId parent = scene.createEntity();
+const yorengine::EntityId child = scene.createEntity();
+scene.setParent(child, parent);
+scene.emplaceComponent<yorengine::CameraComponent>(parent);
+scene.update(1.0 / 60.0);
+```
+
+`Scene` owns entities and components. Components must not retain raw pointers
+to scene storage; use their attach/detach hooks and stable `EntityId` values.
+Structural changes made by a component during `Scene::update` are handled by a
+snapshot of the current component list and are visible on the next relevant
+iteration.
+
+## Transitional JVM Scope
 
 The interim JVM slice currently provides a first engine-facing scene layer:
 
@@ -24,9 +66,10 @@ The interim JVM slice currently provides a first engine-facing scene layer:
   is added;
 - `Scene.version()` allows clients to skip unchanged mesh uploads.
 
-This is not the final C++ engine architecture and is not a claim that the
-engine is already a complete game runtime. The C++ migration and missing
-systems are tracked in
+This JVM API remains migration input and is not a second engine
+implementation. New engine systems must be implemented in C++ first; a JVM
+binding is added only after the native contract is stable and tested. The
+remaining migration work and missing systems are tracked in
 [`yorengine-roadmap.md`](yorengine-roadmap.md).
 
 ## Dependency Direction
@@ -45,7 +88,7 @@ asset extraction, or a retained UI toolkit. A client translates its own world
 and assets into engine data, and the C++ engine translates renderable data into
 YorGL calls.
 
-## Example
+## Transitional JVM Example
 
 ```java
 Scene scene = new Scene();

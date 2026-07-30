@@ -4,6 +4,7 @@ project(YorGL VERSION 0.1.0 LANGUAGES CXX)
 option(YORGL_BUILD_DX11 "Build DirectX 11 backend on Windows" ON)
 option(YORGL_BUILD_JNI "Build JNI entry points" ON)
 option(YORGL_BUILD_TESTS "Build smoke tests" ON)
+option(YORGL_BUILD_YORENGINE "Build the C++ YorEngine core" ON)
 
 add_library(yorgl SHARED
     src/yorgl/api.cpp
@@ -53,4 +54,8 @@ if (YORGL_BUILD_TESTS)
     add_executable(yorgl_smoke tests/smoke.cpp)
     target_link_libraries(yorgl_smoke PRIVATE yorgl)
     add_test(NAME yorgl_smoke COMMAND yorgl_smoke)
+endif()
+
+if (YORGL_BUILD_YORENGINE)
+    add_subdirectory(yorengine)
 endif()
