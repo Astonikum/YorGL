@@ -26,12 +26,14 @@ implementation classes.
   Windows JVM smoke test; it owns no duplicate scene state.
 - C++ `Runtime` with fixed-step scheduling, bounded catch-up, deterministic
   system order, pause/stop/single-step, and deferred system destruction.
+- Immutable `RenderSnapshot` handoff with active filtering, world matrices, and
+  copied mesh/camera/light render data.
 - Interim JVM module `org.yorgl:yorengine` with `Scene`, `SceneObject`,
   parent/child transforms, `Component`, `Script`, `Camera`, `Light`,
   `Material`, and `MeshComponent`; this remains migration input and must not
   grow duplicate engine logic.
-- No stable render snapshots, asset database, material/shader system, render
-  graph, animation, physics, audio, input abstraction, UI,
+- No asset database, material/shader system, render graph, animation, physics,
+  audio, input abstraction, UI,
   editor, save format, networking, tooling, or complete sample game.
 
 ## Phase 0 - C++ core and binding boundary
@@ -78,6 +80,8 @@ implementation classes.
 - [x] Add the first engine lifecycle with fixed simulation ticks, pause,
   single-step, shutdown, deterministic system order, bounded catch-up, and
   failure propagation.
+- [x] Add an immutable simulation-to-render snapshot with active filtering and
+  copied render-facing data.
 - [ ] Add variable render ticks, explicit startup/shutdown service ownership,
   and render-thread handoff contracts.
 - Make component attach/detach/dispose behavior explicit; support command

@@ -36,8 +36,14 @@ backend-specific dependency.
 
 YorEngine may depend on YorGL, but YorGL must never depend on YorEngine. The
 engine does not move Minecraft extraction, gameplay rules, networking, or
-Frost UI into the renderer library. The current JVM scene slice is transitional
-and must migrate behind the C++ YorEngine API rather than grow new engine logic.
+Frost UI into the renderer library. The current simulation flow is:
+
+```text
+YorEngine Scene/Runtime -> immutable RenderSnapshot -> YorGL C API -> backend
+```
+
+The current JVM scene slice is transitional and must migrate behind the C++
+YorEngine API rather than grow new engine logic.
 
 ## Layers
 

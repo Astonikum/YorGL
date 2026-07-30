@@ -17,6 +17,7 @@
 namespace yorengine {
 
 class Scene;
+class RenderSnapshot;
 
 struct EntityId {
     static constexpr std::uint32_t InvalidIndex = std::numeric_limits<std::uint32_t>::max();
@@ -146,6 +147,7 @@ public:
     bool setActive(EntityId entity, bool active);
 
     void update(double deltaSeconds);
+    RenderSnapshot captureRenderSnapshot() const;
 
     std::uint64_t version() const noexcept { return version_; }
     void setProperty(EntityId entity, std::string key, std::string value);

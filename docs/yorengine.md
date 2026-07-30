@@ -28,7 +28,9 @@ currently provides:
   and `LightComponent` data contracts with input validation;
 - `Runtime` with deterministic fixed-step scheduling, ordered native systems,
   pause/stop/single-step controls, bounded catch-up, and safe system removal
-  during a tick.
+  during a tick;
+- immutable `RenderSnapshot` values containing active mesh, camera, light, and
+  world-transform data, isolated from later simulation mutations.
 
 The native scene core deliberately does not claim to be a complete runtime
 yet: asset loading, render submission, physics, animation, audio, input,
@@ -90,6 +92,13 @@ Each fixed step invokes registered systems in registration order and then
 updates scene components. Systems added during a step join the next step;
 removed systems are skipped immediately and destroyed after the current step.
 `Runtime` is deliberately single-thread-owned in this first contract.
+
+`Scene::captureRenderSnapshot()` is the simulation-to-render handoff. It copies
+the current source version and render-facing values into an immutable snapshot;
+subsequent entity destruction, transform edits, or component edits cannot alter
+an already captured snapshot. The first implementation copies mesh vertices for
+correct ownership; GPU upload/resource handles are later YorGL integration
+work.
 
 `Scene` owns entities and components. Components must not retain raw pointers
 to scene storage; use their attach/detach hooks and stable `EntityId` values.

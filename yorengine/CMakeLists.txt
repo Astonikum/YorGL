@@ -1,5 +1,6 @@
 add_library(yorengine STATIC
     src/math.cpp
+    src/render_snapshot.cpp
     src/runtime.cpp
     src/scene.cpp
 )
@@ -53,6 +54,10 @@ if (YORGL_BUILD_TESTS)
     add_executable(yorengine_runtime_smoke tests/runtime_smoke.cpp)
     target_link_libraries(yorengine_runtime_smoke PRIVATE yorengine)
     add_test(NAME yorengine_runtime_smoke COMMAND yorengine_runtime_smoke)
+
+    add_executable(yorengine_render_snapshot_smoke tests/render_snapshot_smoke.cpp)
+    target_link_libraries(yorengine_render_snapshot_smoke PRIVATE yorengine)
+    add_test(NAME yorengine_render_snapshot_smoke COMMAND yorengine_render_snapshot_smoke)
 
     add_executable(yorengine_api_smoke tests/api_smoke.cpp)
     target_link_libraries(yorengine_api_smoke PRIVATE yorengine_api)
