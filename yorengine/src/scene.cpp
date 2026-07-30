@@ -17,6 +17,13 @@ void requireFiniteNonNegative(float value, const char* name) {
     if (value < 0.0f) throw std::invalid_argument(std::string(name) + " must not be negative");
 }
 
+bool finiteTransform(const Transform& transform) noexcept {
+    return std::isfinite(transform.position.x) && std::isfinite(transform.position.y) && std::isfinite(transform.position.z) &&
+           std::isfinite(transform.rotation.x) && std::isfinite(transform.rotation.y) &&
+           std::isfinite(transform.rotation.z) && std::isfinite(transform.rotation.w) &&
+           std::isfinite(transform.scale.x) && std::isfinite(transform.scale.y) && std::isfinite(transform.scale.z);
+}
+
 } // namespace
 
 void Component::attach(Scene& scene, EntityId entity) {
@@ -129,6 +136,8 @@ EntityId Scene::createEntity() {
     slot.parent = {};
     slot.children.clear();
     slot.transform = {};
+    slot.cachedWorldMatrix = {};
+    slot.worldTransformVersion = 0;
     slot.components.clear();
     slot.properties.clear();
     markChanged();
@@ -194,6 +203,7 @@ bool Scene::setParent(EntityId child, EntityId newParent) {
     if (childSlot.parent.valid() && isAlive(childSlot.parent)) unlinkChild(childSlot.parent, child);
     childSlot.parent = newParent;
     slots_[newParent.index].children.push_back(child);
+    markTransformChanged();
     markChanged();
     return true;
 }
@@ -204,6 +214,7 @@ bool Scene::clearParent(EntityId child) {
     if (!childSlot.parent.valid()) return true;
     if (isAlive(childSlot.parent)) unlinkChild(childSlot.parent, child);
     childSlot.parent = {};
+    markTransformChanged();
     markChanged();
     return true;
 }
@@ -221,24 +232,24 @@ Transform Scene::transform(EntityId entity) const {
 }
 
 bool Scene::setTransform(EntityId entity, Transform value) {
-    if (!isAlive(entity)) return false;
+    if (!isAlive(entity) || !finiteTransform(value)) return false;
     slots_[entity.index].transform = value;
+    markTransformChanged();
     markChanged();
     return true;
 }
 
 Mat4 Scene::worldMatrix(EntityId entity) const {
-    requireSlot(entity);
-    std::vector<EntityId> chain;
-    for (EntityId current = entity; current.valid() && isAlive(current); current = slots_[current.index].parent) {
-        chain.push_back(current);
-    }
+    const EntitySlot& slot = requireSlot(entity);
+    if (slot.worldTransformVersion == transformVersion_) return slot.cachedWorldMatrix;
 
-    Mat4 result = Mat4::identity();
-    for (auto it = chain.rbegin(); it != chain.rend(); ++it) {
-        result = result * slots_[it->index].transform.localMatrix();
-    }
-    return result;
+    const EntityId parentEntity = slot.parent;
+    const Mat4 local = slot.transform.localMatrix();
+    slot.cachedWorldMatrix = parentEntity.valid() && isAlive(parentEntity)
+        ? worldMatrix(parentEntity) * local
+        : local;
+    slot.worldTransformVersion = transformVersion_;
+    return slot.cachedWorldMatrix;
 }
 
 bool Scene::active(EntityId entity) const {
@@ -287,6 +298,16 @@ std::optional<std::string> Scene::property(EntityId entity, std::string_view key
 
 void Scene::markChanged() noexcept {
     if (version_ != std::numeric_limits<std::uint64_t>::max()) ++version_;
+}
+
+void Scene::markTransformChanged() noexcept {
+    if (transformVersion_ != std::numeric_limits<std::uint64_t>::max()) {
+        ++transformVersion_;
+        return;
+    }
+
+    transformVersion_ = 1;
+    for (auto& slot : slots_) slot.worldTransformVersion = 0;
 }
 
 Scene::EntitySlot& Scene::requireSlot(EntityId entity) {

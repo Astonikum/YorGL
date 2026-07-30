@@ -114,6 +114,13 @@ bool validCamera(const YorEngineCameraState& camera) noexcept {
            std::isfinite(camera.farPlane) && camera.farPlane > camera.nearPlane;
 }
 
+bool validTransform(const YorEngineTransform& transform) noexcept {
+    return std::isfinite(transform.position.x) && std::isfinite(transform.position.y) && std::isfinite(transform.position.z) &&
+           std::isfinite(transform.rotation.x) && std::isfinite(transform.rotation.y) &&
+           std::isfinite(transform.rotation.z) && std::isfinite(transform.rotation.w) &&
+           std::isfinite(transform.scale.x) && std::isfinite(transform.scale.y) && std::isfinite(transform.scale.z);
+}
+
 bool validLight(const YorEngineLightState& light) noexcept {
     return validLightKind(light.kind) &&
            std::isfinite(light.color.x) && light.color.x >= 0.0f &&
@@ -243,7 +250,10 @@ YorEngineStatus yorengineSceneSetTransform(YorEngineScene* scene, YorEngineEntit
     return invoke([&] {
         if (const auto status = requireEntity(scene, entity); status != YORENGINE_STATUS_OK) return status;
         if (!transform) return failure(YORENGINE_STATUS_INVALID_ARGUMENT, "Transform must not be null");
-        scene->scene.setTransform(toNative(entity), toNative(*transform));
+        if (!validTransform(*transform)) return failure(YORENGINE_STATUS_INVALID_ARGUMENT, "Transform values must be finite");
+        if (!scene->scene.setTransform(toNative(entity), toNative(*transform))) {
+            return failure(YORENGINE_STATUS_INVALID_ARGUMENT, "Transform values are invalid");
+        }
         return YORENGINE_STATUS_OK;
     });
 }

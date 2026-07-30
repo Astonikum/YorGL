@@ -17,6 +17,8 @@ implementation classes.
   transform composition.
 - Generation-checked entity ids, deterministic enumeration, hierarchy cycle
   rejection, cascading destruction, active state, metadata, and versioning.
+- Cached world transforms with revision invalidation and finite-value
+  validation for position, rotation, and scale.
 - Snapshot-safe C++ component updates, attach/detach hooks, safe removal during
   iteration, and initial mesh/camera/light components.
 - Native Debug and Release smoke coverage for the above contracts.

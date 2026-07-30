@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <iostream>
+#include <limits>
 #include <stdexcept>
 
 #define CHECK(expression) \
@@ -58,6 +59,13 @@ int main() {
         assertNear(13.0f, worldPoint.x);
         assertNear(2.0f, worldPoint.y);
         assertNear(-3.0f, worldPoint.z);
+        parentTransform.position.x = 12.0f;
+        CHECK(scene.setTransform(parent, parentTransform));
+        const Vec3 updatedWorldPoint = scene.worldMatrix(child).transformPoint({1.0f, 0.0f, 0.0f});
+        assertNear(15.0f, updatedWorldPoint.x);
+        Transform invalidTransform = childTransform;
+        invalidTransform.position.x = std::numeric_limits<float>::quiet_NaN();
+        CHECK(!scene.setTransform(child, invalidTransform));
 
         const std::uint64_t version = scene.version();
         scene.setProperty(child, "source", "test");

@@ -173,6 +173,8 @@ private:
         EntityId parent{};
         std::vector<EntityId> children;
         Transform transform{};
+        mutable Mat4 cachedWorldMatrix{};
+        mutable std::uint64_t worldTransformVersion = 0;
         std::vector<std::shared_ptr<Component>> components;
         std::unordered_map<std::string, std::string> properties;
     };
@@ -182,10 +184,12 @@ private:
     bool hasComponent(EntityId entity, const std::shared_ptr<Component>& component) const noexcept;
     bool isAncestor(EntityId candidate, EntityId possibleAncestor) const noexcept;
     void unlinkChild(EntityId parent, EntityId child);
+    void markTransformChanged() noexcept;
 
     std::vector<EntitySlot> slots_;
     std::vector<std::uint32_t> freeIndices_;
     std::uint64_t version_ = 1;
+    std::uint64_t transformVersion_ = 1;
 };
 
 template <typename T, typename... Args>

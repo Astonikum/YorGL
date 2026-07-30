@@ -20,7 +20,8 @@ currently provides:
   reuse;
 - `Scene` entity creation/destruction, deterministic entity enumeration,
   parent/child hierarchy, cycle rejection, local/world transforms, active state,
-  version tracking, and string metadata;
+  cached world transforms with hierarchy invalidation, version tracking, and
+  string metadata;
 - a snapshot-safe `Component` lifecycle with attach/detach/update hooks and
   safe structural removal during update;
 - generic custom components plus initial `MeshComponent`, `CameraComponent`,
@@ -45,6 +46,10 @@ surface covers:
 - camera and light component creation, queries, and validated updates.
 
 `YorEngineMat4` values are column-major, matching the native `Mat4` contract.
+Transform position, rotation, and scale values must be finite; invalid values
+are rejected before they can poison a world-matrix cache. World matrices are
+cached behind a scene transform revision and are recomputed after a local
+transform or hierarchy change.
 The error string remains valid until the next YorEngine C API call on the same
 thread. Generic user-defined C++ components are intentionally not exposed as
 fake C handles; a later binding design must specify their ownership and

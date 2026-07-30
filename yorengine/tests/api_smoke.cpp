@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <iostream>
+#include <limits>
 #include <string>
 #include <stdexcept>
 
@@ -43,12 +44,19 @@ int main() {
         YorEngineTransform childTransform{{1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f, 1.0f}, {2.0f, 2.0f, 2.0f}};
         checkStatus(yorengineSceneSetTransform(scene, parent, &parentTransform), YORENGINE_STATUS_OK);
         checkStatus(yorengineSceneSetTransform(scene, child, &childTransform), YORENGINE_STATUS_OK);
+        YorEngineTransform invalidTransform = childTransform;
+        invalidTransform.position.x = std::numeric_limits<float>::quiet_NaN();
+        checkStatus(yorengineSceneSetTransform(scene, child, &invalidTransform), YORENGINE_STATUS_INVALID_ARGUMENT);
 
         YorEngineMat4 world{};
         checkStatus(yorengineSceneGetWorldMatrix(scene, child, &world), YORENGINE_STATUS_OK);
         checkNear(11.0f, world.values[12]);
         checkNear(2.0f, world.values[13]);
         checkNear(-3.0f, world.values[14]);
+        parentTransform.position.x = 12.0f;
+        checkStatus(yorengineSceneSetTransform(scene, parent, &parentTransform), YORENGINE_STATUS_OK);
+        checkStatus(yorengineSceneGetWorldMatrix(scene, child, &world), YORENGINE_STATUS_OK);
+        checkNear(13.0f, world.values[12]);
 
         YorEngineEntityId actualParent{};
         checkStatus(yorengineSceneGetParent(scene, child, &actualParent), YORENGINE_STATUS_OK);
