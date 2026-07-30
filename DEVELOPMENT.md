@@ -11,6 +11,11 @@ implementation language for both projects. JVM/Kotlin/Java code is limited to
 bindings and transitional adapters; it must not duplicate engine simulation or
 renderer ownership.
 
+YorStudio is a separate planned C++ desktop target under `yorstudio`. Its
+project model, editor commands, content tools, and editor state remain above
+YorEngine. Dear ImGui is confined to the YorStudio UI adapter; ImGui headers
+must not enter YorGL, YorEngine, or project/document models.
+
 Rules:
 
 - `null` backend must stay buildable on every platform.
@@ -21,6 +26,11 @@ Rules:
 - Kotlin artifact builds must keep bundled native loading working on Windows x64.
 - Every public YorEngine C++ API addition gets matching English documentation
   and a native test that exercises its ownership and failure behavior.
+- YorStudio project files must be versioned separately from `.yor/` caches,
+  generated data, and build output. Project discovery must not execute project
+  code or plugins.
+- YorStudio editor writes go through commands/transactions and public
+  YorEngine APIs; no private Scene storage access.
 
 ## Local Checks
 

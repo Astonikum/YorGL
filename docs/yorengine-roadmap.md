@@ -2,8 +2,10 @@
 
 YorEngine is the C++ generic 3D engine layer above YorGL. Its goal is to make a
 complete non-Minecraft game possible without turning YorGL into a game engine
-or moving Frost UI into either renderer project. JVM/Kotlin code remains a
-secondary binding/adapter surface.
+or moving Frost UI into either renderer project. YorStudio is the separate
+editor/launcher above YorEngine; it consumes public engine contracts and does
+not move editor state into the runtime. JVM/Kotlin code remains a secondary
+binding/adapter surface.
 
 The engine must remain usable as a library: every system has explicit lifetime,
 thread, ownership, serialization, and deterministic-update rules. A system is
@@ -28,6 +30,9 @@ implementation classes.
   system order, pause/stop/single-step, and deferred system destruction.
 - Immutable `RenderSnapshot` handoff with active filtering, world matrices, and
   copied mesh/camera/light render data.
+- YorStudio is planned as a separate C++ desktop product; its project format,
+  launcher, ImGui adapter seam, and editor roadmap live in
+  [`yorstudio-roadmap.md`](yorstudio-roadmap.md).
 - Interim JVM module `org.yorgl:yorengine` with `Scene`, `SceneObject`,
   parent/child transforms, `Component`, `Script`, `Camera`, `Light`,
   `Material`, and `MeshComponent`; this remains migration input and must not

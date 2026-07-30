@@ -13,7 +13,8 @@ Current backend modules:
 
 YorGL does not ship a retained UI toolkit. It exposes low-level drawing calls only; game engines own their menus, widgets, input, layout, animation, and styling.
 
-This repository contains two build products with a hard ownership boundary:
+This repository is becoming the YOR ecosystem with three hard product
+boundaries:
 
 - `YorGL` is the low-level C++ renderer/API project. It owns the stable C ABI,
   native resource handles, backend implementations, and the JVM renderer
@@ -22,6 +23,10 @@ This repository contains two build products with a hard ownership boundary:
   owns generic 3D scene objects, components, transforms, cameras, lights, and
   the engine runtime. JVM/Kotlin code is only a secondary binding/adapter and
   must not become the home of engine logic.
+- `YorStudio` is the planned C++ desktop launcher/editor under `yorstudio`.
+  It will own project lifecycle, editor commands, content tooling, and UI
+  adapters; it will not become a runtime dependency or duplicate YorEngine
+  state.
 
 The native build produces the `yorgl` renderer library, the `yorengine` C++
 static library, and the `yorengine_api` shared C binding. YorEngine currently
@@ -44,6 +49,9 @@ Planned backends are added only when they render something real.
 - [DX11 Backend](docs/dx11-backend.md)
 - [YorGL roadmap](docs/yorgl-roadmap.md)
 - [YorEngine roadmap](docs/yorengine-roadmap.md)
+- [YOR ecosystem](docs/yor-ecosystem.md)
+- [YorStudio](docs/yorstudio.md)
+- [YorStudio roadmap](docs/yorstudio-roadmap.md)
 - [Security Policy](SECURITY.md)
 
 ## Use From Gradle Git Source Dependency
@@ -75,6 +83,11 @@ ctest --test-dir build -C Release --output-on-failure
 
 Use `-DYORGL_BUILD_YORENGINE=OFF` only when a renderer-only build is required.
 The default build includes YorEngine and its native smoke test.
+
+YorStudio is currently at the contract/roadmap stage. Its first executable
+will be added only with a tested project manifest, launcher lifecycle, platform
+window, and replaceable UI boundary; there is intentionally no placeholder
+ImGui executable in the native build yet.
 
 ## Build JVM Artifact
 

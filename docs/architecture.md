@@ -17,7 +17,8 @@ Null / DX11 / future backend
 
 ## Project Boundary
 
-The repository contains two separate build products:
+The repository contains two implemented native products and one planned
+desktop product:
 
 - **YorGL** is the low-level renderer project. It owns the C ABI, C++ backend
   interface, native resource lifetime, command execution, and the thin JVM
@@ -26,6 +27,9 @@ The repository contains two separate build products:
   generic scene graphs, objects, components, transforms, cameras, lights,
   materials, and engine runtime systems. JVM/Kotlin code is only a secondary
   binding/adapter layer.
+- **YorStudio** is the separate C++ desktop launcher/editor product planned
+  under `yorstudio`. It owns project files, editor commands, content tooling,
+  selection, undo/redo, diagnostics, and UI adapters.
 
 The native build keeps the projects as separate targets: `yorgl` is the
 renderer library, while `yorengine` is the C++ engine library and
@@ -44,6 +48,10 @@ YorEngine Scene/Runtime -> immutable RenderSnapshot -> YorGL C API -> backend
 
 The current JVM scene slice is transitional and must migrate behind the C++
 YorEngine API rather than grow new engine logic.
+
+YorStudio must depend on YorEngine public contracts and RenderSnapshot values.
+It may submit editor commands to mutate authoring state, but it must not call
+private engine storage or make ImGui types part of YorEngine/YorGL headers.
 
 ## Layers
 
