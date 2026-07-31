@@ -43,6 +43,14 @@ public final class YorGL implements AutoCloseable {
         return handle != 0L && YorGLNative.isValid(handle);
     }
 
+    public YorGLResult getLastError() {
+        return YorGLResult.fromId(YorGLNative.getLastError());
+    }
+
+    public void clearLastError() {
+        YorGLNative.clearLastError();
+    }
+
     public String getBackendName() {
         return YorGLNative.backendName(handle);
     }

@@ -22,6 +22,11 @@ documentation, and a runnable regression check agree.
 
 ## Phase 1 — API and lifetime correctness
 
+- Implemented slice: the C ABI now reports thread-local result codes and
+  rejects invalid dimensions, byte counts, numeric values, present modes,
+  world vertex strides, layers, and font inputs before backend dispatch. Native
+  smoke coverage and the Java/JNI result mirror are in place; opaque resource
+  ownership tracking and complete destruction-order enforcement remain below.
 - Replace ambiguous integer arguments with versioned descriptors where the ABI
   needs them; keep old entry points only when they are exact aliases.
 - Validate dimensions, byte counts, vertex strides, layer ids, present options,

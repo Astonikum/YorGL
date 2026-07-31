@@ -4,6 +4,10 @@ The C API in `src/yorgl/api.h` is the stable boundary used by language bindings.
 
 ## Lifetime
 
+- `yorglGetLastError()` returns the result of the most recent C API call on the
+  calling thread; `yorglClearLastError()` resets it to `YORGL_RESULT_OK`.
+  Results distinguish invalid arguments, invalid handles, an uninitialized
+  renderer, and backend failure.
 - `yorglCreate(backend)` creates a renderer using `YORGL_BACKEND_NULL` or `YORGL_BACKEND_DX11`.
 - `yorglDestroy(renderer)` releases the renderer and all backend-owned graphics resources.
 - `yorglIsValid(renderer)` reports whether backend initialization succeeded.
@@ -23,6 +27,12 @@ The C API in `src/yorgl/api.h` is the stable boundary used by language bindings.
 - `yorglSetPresentMode(renderer, YORGL_PRESENT_VSYNC)` presents with vertical sync.
 - `yorglSetPresentMode(renderer, YORGL_PRESENT_IMMEDIATE)` presents without waiting for vblank; the DX11 backend enables DXGI tearing when the OS and driver report support.
 - `yorglEndFrame(renderer)` presents the frame when the backend owns a swap chain.
+
+The C boundary rejects non-positive dimensions, non-finite numeric values,
+invalid present modes, invalid layer ids, RGBA buffers smaller than
+`width * height * 4`, and world vertex arrays that are not a non-empty multiple
+of the nine-float `position/color/uv` stride. Rejected calls do not reach a
+backend and set the thread-local result.
 
 ## Textures
 

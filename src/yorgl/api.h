@@ -22,6 +22,14 @@ typedef enum YorGLTextureFilter {
     YORGL_TEXTURE_FILTER_LINEAR = 1
 } YorGLTextureFilter;
 
+typedef enum YorGLResult {
+    YORGL_RESULT_OK = 0,
+    YORGL_RESULT_INVALID_ARGUMENT = 1,
+    YORGL_RESULT_INVALID_HANDLE = 2,
+    YORGL_RESULT_NOT_READY = 3,
+    YORGL_RESULT_BACKEND_FAILURE = 4
+} YorGLResult;
+
 typedef struct YorGLCapabilities {
     int backend;
     int featureLevelMajor;
@@ -47,6 +55,9 @@ typedef struct YorGLRenderDiagnostics {
 } YorGLRenderDiagnostics;
 
 typedef struct YorGLRenderer YorGLRenderer;
+
+YORGL_API YorGLResult yorglGetLastError(void);
+YORGL_API void yorglClearLastError(void);
 
 YORGL_API YorGLRenderer* yorglCreate(YorGLBackendKind backend);
 YORGL_API void yorglDestroy(YorGLRenderer* renderer);
