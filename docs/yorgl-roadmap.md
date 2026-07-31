@@ -25,14 +25,18 @@ documentation, and a runnable regression check agree.
 - Implemented slice: the C ABI now reports thread-local result codes and
   rejects invalid dimensions, byte counts, numeric values, present modes,
   world vertex strides, layers, and font inputs before backend dispatch. Native
-  smoke coverage and the Java/JNI result mirror are in place; opaque resource
-  ownership tracking and complete destruction-order enforcement remain below.
+  smoke coverage and the Java/JNI result mirror are in place.
+- Implemented slice: renderer-owned texture/font registries now reject foreign
+  and destroyed handles, keep font atlases as child resources, prevent direct
+  atlas destruction, and release atlas ownership when the font is destroyed.
+  The null backend creates deterministic headless resources so this contract is
+  covered without a windowed test harness.
 - Replace ambiguous integer arguments with versioned descriptors where the ABI
   needs them; keep old entry points only when they are exact aliases.
 - Validate dimensions, byte counts, vertex strides, layer ids, present options,
   null pointers, and renderer ownership at every C boundary.
-- Make opaque handles type-safe internally, reject foreign or destroyed handles,
-  and define destruction order for textures, fonts, swap chains, and devices.
+- Extend the ownership model to swap chains, device generations, render-target
+  dependencies, and deferred destruction as new resource types are introduced.
 - Return structured status/error values instead of silently swallowing failed
   resource creation or shader compilation.
 - Define the render-thread contract: all context, swap-chain, present, and

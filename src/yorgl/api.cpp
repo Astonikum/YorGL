@@ -76,12 +76,26 @@ static bool validPresentMode(YorGLPresentMode mode) {
     return mode == YORGL_PRESENT_VSYNC || mode == YORGL_PRESENT_IMMEDIATE;
 }
 
-static bool validTextureHandle(std::int64_t texture) {
-    return texture != 0;
+static bool requireTexture(const YorGLRenderer* renderer, std::int64_t texture, bool allowNull = false) {
+    if (allowNull && texture == 0) return true;
+    if (!renderer || !renderer->renderer.ownsTexture(texture)) {
+        return fail(YORGL_RESULT_INVALID_HANDLE);
+    }
+    return true;
 }
 
-static bool validFontHandle(std::int64_t font) {
-    return font != 0;
+static bool requireStandaloneTexture(const YorGLRenderer* renderer, std::int64_t texture) {
+    if (!renderer || !renderer->renderer.ownsStandaloneTexture(texture)) {
+        return fail(YORGL_RESULT_INVALID_HANDLE);
+    }
+    return true;
+}
+
+static bool requireFont(const YorGLRenderer* renderer, std::int64_t font) {
+    if (!renderer || !renderer->renderer.ownsFont(font)) {
+        return fail(YORGL_RESULT_INVALID_HANDLE);
+    }
+    return true;
 }
 
 static PresentMode toPresentMode(YorGLPresentMode mode) {
@@ -296,17 +310,24 @@ int64_t yorglCreateTexture(YorGLRenderer* renderer, int width, int height, const
         return 0;
     }
     const auto texture = b->createTexture(width, height, rgba, byteCount);
-    if (texture != 0) succeed(); else fail(YORGL_RESULT_BACKEND_FAILURE);
+    if (texture != 0 && renderer->renderer.trackTexture(texture)) {
+        succeed();
+    } else {
+        if (texture != 0) b->destroyTexture(texture);
+        fail(YORGL_RESULT_BACKEND_FAILURE);
+        return 0;
+    }
     return texture;
 }
 
 int yorglUpdateTextureRegion(YorGLRenderer* renderer, int64_t texture, int x, int y, int width, int height, const uint8_t* rgba, int byteCount) {
     auto* b = backend(renderer);
     if (!b) return 0;
-    if (!validTextureHandle(texture) || x < 0 || y < 0 || !validPixelData(width, height, rgba, byteCount)) {
+    if (x < 0 || y < 0 || !validPixelData(width, height, rgba, byteCount)) {
         fail(YORGL_RESULT_INVALID_ARGUMENT);
         return 0;
     }
+    if (!requireTexture(renderer, texture)) return 0;
     const bool updated = b->updateTextureRegion(texture, x, y, width, height, rgba, byteCount);
     if (updated) succeed(); else fail(YORGL_RESULT_BACKEND_FAILURE);
     return updated ? 1 : 0;
@@ -314,11 +335,9 @@ int yorglUpdateTextureRegion(YorGLRenderer* renderer, int64_t texture, int x, in
 
 void yorglDestroyTexture(YorGLRenderer* renderer, int64_t texture) {
     if (auto* b = backend(renderer)) {
-        if (!validTextureHandle(texture)) {
-            fail(YORGL_RESULT_INVALID_HANDLE);
-            return;
-        }
+        if (!requireStandaloneTexture(renderer, texture)) return;
         b->destroyTexture(texture);
+        renderer->renderer.releaseTexture(texture);
         succeed();
     }
 }
@@ -360,10 +379,7 @@ void yorglGuiDrawGradientQuad(YorGLRenderer* renderer, float x, float y, float w
 
 void yorglGuiSetTexture(YorGLRenderer* renderer, int64_t texture) {
     if (auto* b = backend(renderer)) {
-        if (texture != 0 && !validTextureHandle(texture)) {
-            fail(YORGL_RESULT_INVALID_HANDLE);
-            return;
-        }
+        if (!requireTexture(renderer, texture, true)) return;
         b->guiSetTexture(texture);
         succeed();
     }
@@ -434,10 +450,7 @@ void yorglCubemapRender(YorGLRenderer* renderer, const int64_t* faces6, float ya
             return;
         }
         for (int index = 0; index < 6; ++index) {
-            if (!validTextureHandle(faces6[index])) {
-                fail(YORGL_RESULT_INVALID_HANDLE);
-                return;
-            }
+            if (!requireTexture(renderer, faces6[index])) return;
         }
         b->cubemapRender(faces6, yawRadians, width, height);
         succeed();
@@ -483,10 +496,11 @@ void yorglWorldUploadSectionLayer(YorGLRenderer* renderer, int64_t sectionId, in
 
 void yorglWorldUploadSectionLayerTextured(YorGLRenderer* renderer, int64_t sectionId, int x, int y, int z, int layer, int64_t texture, const float* vertices, int floatCount) {
     if (auto* b = backend(renderer)) {
-        if (layer < 0 || layer > 3 || !validFloatData(vertices, floatCount) || !validTextureHandle(texture)) {
+        if (layer < 0 || layer > 3 || !validFloatData(vertices, floatCount)) {
             fail(YORGL_RESULT_INVALID_ARGUMENT);
             return;
         }
+        if (!requireTexture(renderer, texture)) return;
         b->worldUploadSectionLayerTextured(sectionId, x, y, z, layer, texture, vertices, floatCount);
         succeed();
     }
@@ -508,10 +522,7 @@ void yorglWorldClearSections(YorGLRenderer* renderer) {
 
 void yorglWorldSetTexture(YorGLRenderer* renderer, int64_t texture) {
     if (auto* b = backend(renderer)) {
-        if (texture != 0 && !validTextureHandle(texture)) {
-            fail(YORGL_RESULT_INVALID_HANDLE);
-            return;
-        }
+        if (!requireTexture(renderer, texture, true)) return;
         b->worldSetTexture(texture);
         succeed();
     }
@@ -571,17 +582,21 @@ int64_t yorglSdfFontCreate(YorGLRenderer* renderer, const uint8_t* ttfData, int 
         return 0;
     }
     const auto font = b->sdfFontCreate(ttfData, byteCount, fontSize);
-    if (font != 0) succeed(); else fail(YORGL_RESULT_BACKEND_FAILURE);
+    if (font != 0 && renderer->renderer.trackFont(font)) {
+        succeed();
+    } else {
+        if (font != 0) b->sdfFontDestroy(font);
+        fail(YORGL_RESULT_BACKEND_FAILURE);
+        return 0;
+    }
     return font;
 }
 
 void yorglSdfFontDestroy(YorGLRenderer* renderer, int64_t font) {
     if (auto* b = backend(renderer)) {
-        if (!validFontHandle(font)) {
-            fail(YORGL_RESULT_INVALID_HANDLE);
-            return;
-        }
+        if (!requireFont(renderer, font)) return;
         b->sdfFontDestroy(font);
+        renderer->renderer.releaseFont(font);
         succeed();
     }
 }
@@ -589,20 +604,23 @@ void yorglSdfFontDestroy(YorGLRenderer* renderer, int64_t font) {
 int64_t yorglSdfFontAtlas(YorGLRenderer* renderer, int64_t font) {
     auto* b = backend(renderer);
     if (!b) return 0;
-    if (!validFontHandle(font)) {
-        fail(YORGL_RESULT_INVALID_HANDLE);
+    if (!requireFont(renderer, font)) return 0;
+    const auto atlas = b->sdfFontAtlas(font);
+    if (atlas != 0 && renderer->renderer.trackFontAtlas(font, atlas)) {
+        succeed();
+    } else {
+        fail(YORGL_RESULT_BACKEND_FAILURE);
         return 0;
     }
-    const auto atlas = b->sdfFontAtlas(font);
-    if (atlas != 0) succeed(); else fail(YORGL_RESULT_BACKEND_FAILURE);
     return atlas;
 }
 
 int yorglSdfFontMetrics(YorGLRenderer* renderer, int64_t font, float* out3) {
     auto* b = backend(renderer);
     if (!b) return 0;
-    if (!validFontHandle(font) || !out3) {
-        fail(!validFontHandle(font) ? YORGL_RESULT_INVALID_HANDLE : YORGL_RESULT_INVALID_ARGUMENT);
+    if (!requireFont(renderer, font)) return 0;
+    if (!out3) {
+        fail(YORGL_RESULT_INVALID_ARGUMENT);
         return 0;
     }
     const bool result = b->sdfFontMetrics(font, out3);
@@ -613,8 +631,9 @@ int yorglSdfFontMetrics(YorGLRenderer* renderer, int64_t font, float* out3) {
 int yorglSdfFontGlyph(YorGLRenderer* renderer, int64_t font, int codepoint, float* out9) {
     auto* b = backend(renderer);
     if (!b) return 0;
-    if (!validFontHandle(font) || !out9 || codepoint < 0 || codepoint > 0x10FFFF) {
-        fail(!validFontHandle(font) ? YORGL_RESULT_INVALID_HANDLE : YORGL_RESULT_INVALID_ARGUMENT);
+    if (!requireFont(renderer, font)) return 0;
+    if (!out9 || codepoint < 0 || codepoint > 0x10FFFF) {
+        fail(YORGL_RESULT_INVALID_ARGUMENT);
         return 0;
     }
     const bool result = b->sdfFontGlyph(font, codepoint, out9);
@@ -625,8 +644,9 @@ int yorglSdfFontGlyph(YorGLRenderer* renderer, int64_t font, int codepoint, floa
 float yorglSdfFontKerning(YorGLRenderer* renderer, int64_t font, int leftCodepoint, int rightCodepoint) {
     auto* b = backend(renderer);
     if (!b) return 0.0f;
-    if (!validFontHandle(font) || leftCodepoint < 0 || leftCodepoint > 0x10FFFF || rightCodepoint < 0 || rightCodepoint > 0x10FFFF) {
-        fail(!validFontHandle(font) ? YORGL_RESULT_INVALID_HANDLE : YORGL_RESULT_INVALID_ARGUMENT);
+    if (!requireFont(renderer, font)) return 0.0f;
+    if (leftCodepoint < 0 || leftCodepoint > 0x10FFFF || rightCodepoint < 0 || rightCodepoint > 0x10FFFF) {
+        fail(YORGL_RESULT_INVALID_ARGUMENT);
         return 0.0f;
     }
     const float result = b->sdfFontKerning(font, leftCodepoint, rightCodepoint);
@@ -637,10 +657,7 @@ float yorglSdfFontKerning(YorGLRenderer* renderer, int64_t font, int leftCodepoi
 float yorglSdfFontTextWidth(YorGLRenderer* renderer, int64_t font, const char* utf8, int byteCount, float scale) {
     auto* b = backend(renderer);
     if (!b) return 0.0f;
-    if (!validFontHandle(font)) {
-        fail(YORGL_RESULT_INVALID_HANDLE);
-        return 0.0f;
-    }
+    if (!requireFont(renderer, font)) return 0.0f;
     if (!utf8 || byteCount <= 0 || !validFinite(scale) || scale <= 0.0f) {
         fail(YORGL_RESULT_INVALID_ARGUMENT);
         return 0.0f;
@@ -653,10 +670,7 @@ float yorglSdfFontTextWidth(YorGLRenderer* renderer, int64_t font, const char* u
 float yorglSdfFontLineHeight(YorGLRenderer* renderer, int64_t font, float scale) {
     auto* b = backend(renderer);
     if (!b) return 0.0f;
-    if (!validFontHandle(font)) {
-        fail(YORGL_RESULT_INVALID_HANDLE);
-        return 0.0f;
-    }
+    if (!requireFont(renderer, font)) return 0.0f;
     if (!validFinite(scale) || scale <= 0.0f) {
         fail(YORGL_RESULT_INVALID_ARGUMENT);
         return 0.0f;
@@ -668,10 +682,7 @@ float yorglSdfFontLineHeight(YorGLRenderer* renderer, int64_t font, float scale)
 
 void yorglSdfFontDrawText(YorGLRenderer* renderer, int64_t font, const char* utf8, int byteCount, float x, float y, float scale, float r, float g, float b, float a, float weight, int shadow) {
     if (auto* native = backend(renderer)) {
-        if (!validFontHandle(font)) {
-            fail(YORGL_RESULT_INVALID_HANDLE);
-            return;
-        }
+        if (!requireFont(renderer, font)) return;
         if (!utf8 || byteCount <= 0 || !validFinite(x) || !validFinite(y) || !validFinite(scale) || scale <= 0.0f ||
             !validFinite(r) || !validFinite(g) || !validFinite(b) || !validFinite(a) || !validFinite(weight) ||
             (shadow != 0 && shadow != 1)) {
