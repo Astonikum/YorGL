@@ -34,11 +34,21 @@ invalid present modes, invalid layer ids, RGBA buffers smaller than
 of the nine-float `position/color/uv` stride. Rejected calls do not reach a
 backend and set the thread-local result.
 
+Opaque texture and font handles belong to the renderer that created them.
+Texture consumers reject foreign and destroyed handles with
+`YORGL_RESULT_INVALID_HANDLE`. Passing `0` is only valid for APIs explicitly
+documented as clearing an optional texture binding. A font atlas is owned by
+its font: it may be used as a texture, but `yorglDestroyTexture` cannot release
+it, and `yorglSdfFontDestroy` releases the font and its atlas together.
+
 ## Textures
 
 - `yorglCreateTexture(renderer, width, height, rgba, byteCount)` uploads RGBA8 pixels and returns an opaque texture handle.
 - `yorglUpdateTextureRegion(renderer, texture, x, y, width, height, rgba, byteCount)` replaces one RGBA8 rectangle in a texture created by the same renderer.
 - `yorglDestroyTexture(renderer, texture)` releases a texture handle created by the same renderer.
+
+Standalone textures can be destroyed exactly once. Font atlas handles are
+renderer-owned child resources and follow the font lifetime.
 
 ## Screen-Space Draw Calls
 

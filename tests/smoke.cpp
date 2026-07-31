@@ -1,5 +1,6 @@
 #include "yorgl/api.h"
 #include <cassert>
+#include <cstdint>
 #include <cstring>
 #include <limits>
 
@@ -28,6 +29,34 @@ int main() {
     assert(yorglGetLastError() == YORGL_RESULT_INVALID_ARGUMENT);
     assert(yorglCreateTexture(renderer, 1, 1, nullptr, 4) == 0);
     assert(yorglGetLastError() == YORGL_RESULT_INVALID_ARGUMENT);
+    const std::uint8_t pixel[4] = {255, 128, 64, 255};
+    const auto texture = yorglCreateTexture(renderer, 1, 1, pixel, sizeof(pixel));
+    assert(texture != 0);
+    assert(yorglGetLastError() == YORGL_RESULT_OK);
+    assert(yorglUpdateTextureRegion(renderer, texture, 0, 0, 1, 1, pixel, sizeof(pixel)));
+    assert(yorglUpdateTextureRegion(renderer, 777, 0, 0, 1, 1, pixel, sizeof(pixel)) == 0);
+    assert(yorglGetLastError() == YORGL_RESULT_INVALID_HANDLE);
+    yorglGuiSetTexture(renderer, texture);
+    assert(yorglGetLastError() == YORGL_RESULT_OK);
+    yorglWorldSetTexture(renderer, texture);
+    assert(yorglGetLastError() == YORGL_RESULT_OK);
+    yorglDestroyTexture(renderer, texture);
+    assert(yorglGetLastError() == YORGL_RESULT_OK);
+    yorglDestroyTexture(renderer, texture);
+    assert(yorglGetLastError() == YORGL_RESULT_INVALID_HANDLE);
+    const std::uint8_t fakeTtf[4] = {0, 1, 2, 3};
+    const auto font = yorglSdfFontCreate(renderer, fakeTtf, sizeof(fakeTtf), 16.0f);
+    assert(font != 0);
+    const auto atlas = yorglSdfFontAtlas(renderer, font);
+    assert(atlas != 0);
+    yorglGuiSetTexture(renderer, atlas);
+    assert(yorglGetLastError() == YORGL_RESULT_OK);
+    yorglDestroyTexture(renderer, atlas);
+    assert(yorglGetLastError() == YORGL_RESULT_INVALID_HANDLE);
+    yorglSdfFontDestroy(renderer, font);
+    assert(yorglGetLastError() == YORGL_RESULT_OK);
+    yorglGuiSetTexture(renderer, atlas);
+    assert(yorglGetLastError() == YORGL_RESULT_INVALID_HANDLE);
     yorglDestroyTexture(renderer, 0);
     assert(yorglGetLastError() == YORGL_RESULT_INVALID_HANDLE);
     yorglBeginFrame(renderer);
@@ -38,7 +67,7 @@ int main() {
     yorglWorldUploadMesh(renderer, vertex, 9);
     assert(yorglGetLastError() == YORGL_RESULT_OK);
     yorglWorldUploadSectionLayerTextured(renderer, 1, 0, 0, 0, 1, 0, vertex, 9);
-    assert(yorglGetLastError() == YORGL_RESULT_INVALID_ARGUMENT);
+    assert(yorglGetLastError() == YORGL_RESULT_INVALID_HANDLE);
     yorglEndFrame(renderer);
     yorglDestroy(renderer);
     return 0;
