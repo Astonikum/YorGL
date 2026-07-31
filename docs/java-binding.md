@@ -36,6 +36,10 @@ YorGL.create(BackendKind.Dx11).use { renderer ->
 }
 ```
 
+`YorGL.getLastError()` exposes the native `YorGLResult` for the calling thread;
+`clearLastError()` resets it. Input validation remains native and the JVM layer
+does not duplicate renderer state or silently reinterpret rejected calls.
+
 ## Surface
 
 The Java class mirrors the C API:

@@ -7,6 +7,14 @@ static YorGLRenderer* handle(jlong ptr) {
 
 extern "C" {
 
+JNIEXPORT jint JNICALL Java_org_yorgl_YorGLNative_getLastError(JNIEnv*, jclass) {
+    return static_cast<jint>(yorglGetLastError());
+}
+
+JNIEXPORT void JNICALL Java_org_yorgl_YorGLNative_clearLastError(JNIEnv*, jclass) {
+    yorglClearLastError();
+}
+
 JNIEXPORT jlong JNICALL Java_org_yorgl_YorGLNative_create(JNIEnv*, jclass, jint backend) {
     return reinterpret_cast<jlong>(yorglCreate(static_cast<YorGLBackendKind>(backend)));
 }

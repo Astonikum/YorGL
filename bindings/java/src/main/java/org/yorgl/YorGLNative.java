@@ -4,6 +4,9 @@ final class YorGLNative {
     private YorGLNative() {
     }
 
+    static native int getLastError();
+    static native void clearLastError();
+
     static native long create(int backend);
     static native void destroy(long ptr);
     static native boolean isValid(long ptr);
