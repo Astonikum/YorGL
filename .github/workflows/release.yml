@@ -78,6 +78,6 @@ jobs:
             name="$(basename "$dir")"
             (cd "$dir" && zip -r "../../release/${name}.zip" .)
           done
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           files: release/*.zip
