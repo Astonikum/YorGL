@@ -17,7 +17,7 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
       - name: Build Kotlin artifact with bundled Windows native library
         run: ./gradlew.bat clean build
       - name: Stage Kotlin artifact
